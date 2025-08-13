@@ -1,0 +1,105 @@
+
+body {
+  background: #f4f4f4;
+  font-family: 'Segoe UI', Arial, sans-serif;
+}
+
+.cv-container {
+  display: flex;
+  max-width: 1100px;
+  margin: 40px auto;
+  background: #fff;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.cv-sidebar {
+  background: #23272b;
+  color: #fff;
+  width: 320px;
+  padding: 32px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.cv-sidebar a {
+  color: #8ecae6;
+  text-decoration: underline;
+}
+
+.sidebar-section h4 {
+  margin-bottom: 8px;
+  color: #ffd166;
+  font-size: 1.1em;
+}
+.sidebar-section ul {
+  margin: 0 0 12px 0;
+  padding-left: 18px;
+}
+.sidebar-section b {
+  color: #8ecae6;
+  font-weight: 500;
+}
+.sidebar-contact {
+  margin-bottom: 16px;
+  font-size: 1em;
+}
+
+.cv-main {
+  flex: 1;
+  padding: 40px 36px;
+  color: #23272b;
+}
+.cv-main h1 {
+  font-size: 2.2em;
+  margin-bottom: 0;
+}
+.cv-main h2 {
+  font-size: 1.2em;
+  color: #219ebc;
+  margin-top: 0;
+  margin-bottom: 18px;
+}
+.cv-profile {
+  font-weight: 500;
+  color: #219ebc;
+  margin-bottom: 8px;
+}
+.cv-description {
+  font-size: 1em;
+  margin-bottom: 24px;
+}
+.cv-main section {
+  margin-bottom: 32px;
+}
+.cv-main h3 {
+  color: #023047;
+  font-size: 1.1em;
+  margin-bottom: 10px;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 4px;
+}
+.cv-experience, .cv-projet, .cv-formation {
+  margin-bottom: 18px;
+}
+.cv-experience b, .cv-projet b, .cv-formation b {
+  color: #219ebc;
+}
+.cv-experience span, .cv-projet span, .cv-formation span {
+  color: #666;
+  font-size: 0.98em;
+}
+.cv-experience ul, .cv-projet ul, .cv-formation ul {
+  margin: 6px 0 0 18px;
+  padding: 0;
+}
+
+/* Impression: préserver structure vectorielle et liens cliquables */
+@media print {
+  body { background:#fff !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .controls, button, textarea { display:none !important; }
+  .cv-container { box-shadow:none !important; margin:0 !important; border-radius:0 !important; }
+  a { color:#0645ad !important; text-decoration:underline !important; }
+}
