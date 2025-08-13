@@ -67,7 +67,7 @@ function App() {
           "Développé une app mobile Flutter (auth, QR code, notifications, cartes) + intégration API REST (MVP en 6 semaines)",
           "Optimisé requêtes & UI (temps de chargement écran principal ≈ -30 %)",
           "Structuré les schémas JSON en modèles réutilisables (réduction dette technique analytique)",
-          "Partagé métriques (sessions, rétention) pour prioriser le backlog (temps d’attente tickets mineurs -20 %)"
+          "Partagé métriques (sessions, rétention) pour prioriser le backlog"
         ]
       }
     ],
@@ -562,7 +562,7 @@ enforce();setTimeout(function(){window.print();},80);})();<\/script>`;
               removed.forEach(r => newBulletsRef.current.delete(r));
             }
           // HARD CAP total (exp 0) : maximum 6 lignes après suggestions
-          const MAX_TOTAL_EXP0 = 6;
+          const MAX_TOTAL_EXP0 = 4; // Limite stricte demandée: max 4 lignes (puces + éventuelle synthèse)
           if (targetIdx === 0 && exp.details.length > MAX_TOTAL_EXP0) {
             const originalBase = originalExperiencesRef.current?.[0]?.details || [];
             const baseKeep = originalBase.slice(0, Math.min(originalBase.length, MAX_TOTAL_EXP0 - 2)); // garder base mais laisser place à nouvelles & synthèse
