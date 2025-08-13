@@ -55,9 +55,11 @@ function App() {
         entreprise: 'TRUSTLINE Lyon',
         dates: 'Janvier 2024 à mars 2024',
         details: [
-          "Développement d’une application mobile (Flutter), UI/UX, API, auth, équipe, Git, Agile",
-          "Intégration API, UI mobile, debug, tests, déploiement",
-          "Développement fonctionnalités: login, maps, QR code, push notif"
+          "Développement app mobile Flutter (auth, QR code, notifications, cartes) + intégration d'API REST sécurisées",
+          "Optimisation UI & requêtes réseau (chargement écran principal ~ -30%)",
+          "Tracking basique des événements d’usage & erreurs (Firebase) + suivi crash rate",
+          "Structuration des réponses JSON en modèles réutilisables pour faciliter analyses ultérieures",
+          "Partage de métriques simples (sessions, rétention hebdo) avec l’équipe produit pour prioriser"
         ]
       }
     ],
@@ -256,11 +258,11 @@ function App() {
     try {
       const apiKey = import.meta.env.VITE_GROQ_API_KEY; // clé définie dans .env local côté build
       if (!apiKey) throw new Error('VITE_GROQ_API_KEY manquante dans .env');
-  const prompt = `Tu dois retourner STRICTEMENT un JSON conforme au schéma suivant (aucun texte avant/après) :\n\n{\n  \"mots_cles\": [\"string\"],                // max 15 éléments, sans doublons, importance décroissante\n  \"suggestions\": {\n    \"titre_cv\": \"string (optionnel)\",     // nouveau titre proposé si pertinent\n    \"competences\": {\n      \"ajouter\": {\n        \"outils\": [\"string\"],           // max 12 nouvelles compétences outils à ajouter uniquement si absentes\n        \"analyse\": [\"string\"],          // max 12 analyse / data / métriques\n        \"ia\": [\"string\"]                // max 12 ML/IA\n      }\n    },\n    \"experiences\": {\n      \"puces\": [\"string\"]              // 1 à 8 puces action / impact (verbe fort + résultat quantifié)\n    }\n  }\n}\n\nContraintes :\n- Aucun autre champ que ceux listés.\n- Tableau vide = [] si rien.\n- Pas de doublons (insensible à la casse).\n- Pas d'explication, seulement le JSON.\n\nOFFRE:\n"""${jobOfferText}"""\n\nCV CONTEXTE:\nNom: ${cvData.nom}\nTitre actuel: ${cvData.titre}\nOutils présents: ${cvData.competences.outils.slice(0,12).join(', ')}\nAnalyse présents: ${cvData.competences.analyse.slice(0,12).join(', ')}\nIA présents: ${cvData.competences.ia.slice(0,12).join(', ')}\n`;
+        const prompt = `Retourne STRICTEMENT un JSON suivant (aucun texte avant/après) :\n\n{\n  \"mots_cles\": [\"string\"],                // max 50 éléments, importance décroissante (inclure mots simples ET expressions multi-mots importantes)\n  \"suggestions\": {\n    \"titre_cv\": \"string (optionnel)\",\n    \"competences\": {\n      \"ajouter\": {\n        \"outils\": [\"string\"],           // max 12 nouvelles compétences OUTILS réellement absentes du CV\n        \"analyse\": [\"string\"],          // max 12 concepts data/analyse/métriques absents\n        \"ia\": [\"string\"]                // max 12 ML/IA absents\n      }\n    },\n    \"experiences\": {\n      \"puces\": [\"string\"]              // 1 à 8 puces (verbe d'action + impact chiffré)\n    }\n  }\n}\n\nConsignes mots_cles :\n- EXTRAIRE le plus de mots/expressions pertinents (outils, technos, méthodes, KPIs, domaines, rôles, frameworks, verbes action).\n- Garder la casse normale (première lettre majuscule si nom propre, tout en majuscules pour sigle).\n- PAS de doublons (insensible à la casse et aux accents).\n- Autorisé: expressions multi-mots (ex: \"Analyse prédictive\", \"Random Forest\").\n- Inclure aussi compétences déjà dans le CV si présentes dans l'offre (objectif = matching maximal).\n\nContraintes générales :\n- Aucun autre champ.\n- Tableau vide = [] si rien.\n- Pas d'explication supplémentaire.\n\nOFFRE:\n\"\"\"${jobOfferText}\"\"\"\n\nCV CONTEXTE (extraits) :\nNom: ${cvData.nom}\nTitre actuel: ${cvData.titre}\nOutils présents: ${cvData.competences.outils.slice(0,20).join(', ')}\nAnalyse présents: ${cvData.competences.analyse.slice(0,20).join(', ')}\nIA présents: ${cvData.competences.ia.slice(0,20).join(', ')}\n`;
       const body = {
         model: 'llama-3.3-70b-versatile',
-        temperature: 0.3,
-        max_tokens: 800,
+          temperature: 0.25,
+          max_tokens: 1200,
         response_format: { type: 'json_object' },
         messages: [
           { role: 'system', content: 'Tu es un assistant d\'optimisation de CV concis. Réponds uniquement avec un JSON valide.' },
@@ -303,7 +305,20 @@ function App() {
         if (!parsed) throw new Error('Parsing réponse Groq impossible');
 
         // Normalisation stricte
-        const normalizeArray = (arr, max=15) => Array.isArray(arr) ? [...new Set(arr.filter(x=>typeof x==='string' && x.trim()).map(x=>x.trim()))].slice(0,max) : [];
+        const stripAccents = (s) => s.normalize('NFD').replace(/\p{Diacritic}/gu,'');
+        const normalizeArray = (arr, max=50) => {
+          if (!Array.isArray(arr)) return [];
+          const seen = new Set();
+          const out = [];
+            arr.forEach(x=>{
+              if (typeof x !== 'string') return;
+              const t = x.trim();
+              if (!t) return;
+              const key = stripAccents(t).toLowerCase();
+              if (!seen.has(key)) { seen.add(key); out.push(t); }
+            });
+          return out.slice(0,max);
+        };
         const norm = {
           mots_cles: normalizeArray(parsed.mots_cles || parsed.motsCles, 15),
           suggestions: {
@@ -320,8 +335,46 @@ function App() {
         norm.suggestions.competences.ia = normalizeArray(compAdd.ia,12);
         norm.suggestions.experiences.puces = normalizeArray((sugg.experiences && sugg.experiences.puces) || [],8);
 
+        let motsCles = norm.mots_cles;
+        // Fallback local pour maximiser le rappel: tokenisation brute de l'offre si peu de mots renvoyés
+        if (motsCles.length < 40) {
+          const stop = new Set(['et','de','la','le','les','des','un','une','du','en','dans','pour','par','avec','sur','au','aux','d','à','the','a','an','of','to','on','or','et/ou','ou']);
+          const rawTokens = jobOfferText
+            .replace(/[^A-Za-zÀ-ÖØ-öø-ÿ0-9+#/\.\- ]/g,' ')
+            .split(/\s+/)
+            .filter(t=>t.length>2 && !stop.has(t.toLowerCase()));
+          const enriched = [...motsCles];
+          const seenLocal = new Set(motsCles.map(m=>stripAccents(m).toLowerCase()));
+          rawTokens.forEach(tok=>{
+            const key = stripAccents(tok).toLowerCase();
+            if(!seenLocal.has(key)) { seenLocal.add(key); enriched.push(tok); }
+          });
+          motsCles = normalizeArray(enriched, 50);
+        }
+        // Filtrage de bruit: retirer mots trop génériques si issus du fallback
+        const generic = new Set([
+          'responsable','missions','mission','profil','poste','equipe','equipes','équipe','équipes','societe','entreprise','entreprises','solution','solutions','projet','projets','client','clients','besoins','activites','activités','activite','activité','demandes','capacite','capacité','capacites','capacités','mise','place','mise en place','travailler','travail','bonne','forte','fort','plus','moins','aussi','ainsi','domaine','secteur','niveau','experience','expérience','experiences','expériences','exemple','resultats','résultats','resultat','résultat','support','processus','process','produit','produits','valeur','valeurs','donnees','données','data','analyse','analyses','analyser','optimisation','optimiser','amelioration','amélioration','ameliorer','améliorer','developpement','développement','developper','développer'
+        ]);
+        const monthRe = /^(janv|févr|fevr|mars|avr|mai|juin|juil|août|aout|sept|oct|nov|déc|dec)\w*$/i;
+        const cleaned = [];
+        const keepReason = (w) => {
+          if (!w) return false;
+          const t = w.trim();
+          if (t.length < 3) return false;
+          if (monthRe.test(t)) return false;
+          const lower = t.toLowerCase();
+          if (generic.has(lower)) return false; // génériques fréquents
+          // Garder si contient chiffre, majuscule interne, tiret, slash, ou tout en majuscules (acronyme), ou plusieurs mots
+          if (/\d/.test(t) || /[A-Z].*[A-Z]/.test(t) || /[-/#]/.test(t) || t === t.toUpperCase()) return true;
+          if (t.split(/\s+/).length > 1) return true;
+          // Garder certains patterns métiers/tech
+          if (/(sql|python|power|excel|bi|cloud|api|model|modèle|kpi|kpis|forecast|machine|learning|ia|ml|data|dashboard|scoring|random|forest|regression|régression|classification|segmentation)/i.test(t)) return true;
+          // Sinon garder seulement les 30 premiers non filtrés du modèle initial (motsCles est déjà en ordre d'importance modèle d'abord)
+          return cleaned.length < 30;
+        };
+        motsCles.forEach(m=>{ if (keepReason(m)) cleaned.push(m); });
         const adapted = {
-          motsCles: norm.mots_cles,
+          motsCles: cleaned.slice(0,50),
           suggestions: {
             titre: norm.suggestions.titre,
             competences: norm.suggestions.competences,
