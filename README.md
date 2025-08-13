@@ -1,12 +1,95 @@
-# React + Vite
+<h1 align="center">CV Generator (React + Vite)</h1>
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Application web monopage permettant de :
+1. Afficher/éditer un CV structuré (profil, description, expériences, projets, formations, compétences, langues, certifications, contacts).
+2. Analyser une offre d'emploi via l'API Groq (LLM) et proposer : mots-clés, compétences à ajouter, nouveau titre, puces d'expérience.
+3. Appliquer sélectivement les suggestions au CV.
+4. Exporter le CV en PDF sous plusieurs modes :
+	 - Image (capture html2canvas + jsPDF).
+	 - Impression vectorielle (nouvelle fenêtre + CSS print) avec liens cliquables.
+	 - Reconstruction texte (jsPDF) pour un PDF léger et sélectionnable.
 
-Currently, two official plugins are available:
+## 🚀 Démarrage rapide
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Prérequis : Node 18+.
 
-## Expanding the ESLint configuration
+```bash
+git clone https://github.com/Yohannkp/CV-Generator.git
+cd CV-Generator
+npm install
+cp .env.example .env   # ajouter votre clé Groq
+npm run dev
+```
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+Ouvrir: http://localhost:5173
+
+## 🔐 Configuration API Groq
+
+Créer un fichier `.env` :
+
+```
+VITE_GROQ_API_KEY=sk_....
+```
+
+Attention: la clé est chargée côté client (prototype). Pour la production, mettre un proxy backend.
+
+## 🧠 Analyse d'offre
+
+Coller le texte d'une offre dans la zone prévue puis cliquer « Analyser ». Le LLM retourne un JSON strict contenant :
+```json
+{
+	"mots_cles": ["..."],
+	"suggestions": {
+		"titre_cv": "...",
+		"competences": { "ajouter": { "outils": [], "analyse": [], "ia": [] } },
+		"experiences": { "puces": ["..."] }
+	}
+}
+```
+Le parsing est robuste (plusieurs stratégies) et nettoie doublons/cas.
+
+## 📄 Export PDF
+
+Boutons disponibles :
+| Mode | Avantages | Limites |
+|------|-----------|---------|
+| Image | Aspect identique écran | Texte non sélectionnable |
+| Impression | Vecteur, liens actifs, police nette | Ajustements CSS nécessaires |
+| Texte | Très léger, sélectionnable | Mise en page simplifiée |
+
+Le mode Impression applique un algorithme adaptatif (réduction espacements puis tailles) pour rester sur une seule page A4.
+
+## 🗂 Structure simplifiée
+
+```
+src/
+	App.jsx       # Logique principale (état CV, analyse, export)
+	App.css       # Styles CV
+	main.jsx      # Entrée React
+server/
+	server.js     # (Facultatif) exemple de serveur (non utilisé en prod pour l'instant)
+```
+
+## ✅ Améliorations futures
+
+- Backend proxy pour cacher la clé Groq.
+- Édition inline des sections (inputs / drag & drop).
+- Undo / historique des modifications.
+- Génération multi-versions de CV ciblés.
+- Tests unitaires pour le parseur JSON.
+- Export DOCX.
+
+## 🔧 Scripts NPM
+
+| Script | Description |
+|--------|------------|
+| dev | Lance Vite en mode développement |
+| build | Build production |
+| preview | Prévisualisation du build |
+
+## ⚖️ Licence
+
+MIT. Voir `LICENSE` si ajoutée ultérieurement.
+
+---
+Contributions et issues bienvenues.
