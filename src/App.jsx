@@ -6,25 +6,25 @@ import html2canvas from 'html2canvas';
 import './App.css';
 
 function App() {
+  // Constante de remplissage sidebar compétences
+  const BASE_COMP_COUNT = 33; // nombre cible pour pleine hauteur approx
   // Données du CV inspirées du design fourni (rendent éditables via setCvData)
   const [cvData, setCvData] = useState({
     nom: 'Yohann YENDI',
-  titre: 'Alternant Data – Power BI | Python | Scoring & Analyses Actionnables',
+  titre: 'Alternant Data | Python · SQL · Power BI | Scoring & analyses actionnables',
     contact: {
       telephone: '06 45 86 35 33',
       email: 'yendiyohann@gmail.com',
       adresse: 'Paris (75000)',
       linkedin: 'https://www.linkedin.com/in/yohannkp',
-      portfolio: 'https://www.datascienceportfol.io/yendiyohann'
-      // Permis B supprimé de l'affichage prioritaire (faible valeur ATS)
+      portfolio: 'https://www.datascienceportfol.io/yendiyohann',
+      github: 'https://github.com/Yohannkp'
     },
     langues: [
       { nom: 'Français', niveau: 'Natif' },
       { nom: 'Anglais', niveau: 'Intermédiaire' }
     ],
-    reseaux: [
-      // Réseaux personnels retirés (peu d'impact ATS). Garder LinkedIn déjà dans contact.
-    ],
+    reseaux: [],
     competences: {
       outils: [
         'Python (Pandas, Matplotlib, Scikit-learn)',
@@ -33,32 +33,30 @@ function App() {
         'Power Query / Excel avancé',
         'Git'
       ],
-      // Garder anciens identifiants utilisés par le rendu et la logique suggestions pour éviter les erreurs
       baseDonnees: ['Modélisation relationnelle', 'Jointures complexes', 'Optimisation requêtes', 'Indexation'],
       ia: ['Classification', 'Régression', 'Random Forest', 'XGBoost', 'Feature engineering'],
-      // Nouvelles catégories (alias) – pourront être exploitées plus tard
-      dataEngineering: ['Modélisation relationnelle', 'Jointures complexes', 'Optimisation requêtes', 'Indexation'],
+      dataEngineering: ['Pipelines SQL', 'Nettoyage de données', 'Automatisation scripts', 'Indexation'],
       ml: ['Classification', 'Régression', 'Random Forest', 'XGBoost', 'Feature engineering'],
       analyse: ['EDA', 'KPIs & métriques business', 'A/B Testing', 'Scoring', 'Modélisation prédictive', 'Segmentation clients', 'Analyse rétention'],
-      visualisation: ['Dashboards Power BI', 'Data storytelling', 'Pyramid Principle', 'Rapports automatisés'],
-      business: ['Recueil des besoins', 'Gestion parties prenantes', 'Amélioration de processus', 'Priorisation ROI', 'Analyse fonctionnelle'],
-      soft: ['Analyse & sens business', 'Communication claire', 'Vulgarisation', 'Proactivité & autonomie', 'Travail en équipe']
+      visualisation: ['Dashboards Power BI', 'Data storytelling', 'Pyramid Principle', 'Automatisation de rapports'],
+      business: ['Recueil des besoins', 'Gestion parties prenantes', 'Amélioration de processus', 'Priorisation orientée ROI', 'Analyse fonctionnelle'],
+      soft: ['Sens business & analyse', 'Communication claire', 'Vulgarisation technique', 'Proactivité & autonomie', 'Travail en équipe']
     },
     certifications: [
       'Google Advanced Data Analytics',
       'IBM Data Analyst'
     ],
-  profil: "Data Analyst orienté business : fidélisation, scoring client, aide à la décision. Je traduis les besoins métier en indicateurs et décisions actionnables (Python, SQL, Power BI) et recherche une alternance à fort impact sur la performance.",
-  description: "",
+  profil: "Data Analyst orienté business (fidélisation, scoring client, aide à la décision). Je transforme les besoins métier en indicateurs et leviers actionnables (Python, SQL, Power BI) et recherche une alternance à fort impact performance.",
+    description: "",
     experiences: [
       {
         poste: 'Data Analyst – Analyse comportementale retail',
         entreprise: 'Quantum – Simulation pro Paris',
         dates: '2025',
         details: [
-          'Analyse de 300 000+ transactions pour évaluer l’impact de nouveaux layouts (KPIs : panier moyen, conversion zone)',
-          'Attribution automatique des magasins de contrôle (règles + script SQL) & T-tests sur magasins tests',
-          'Recommandations stratégiques priorisant le déploiement sur segments à ROI le plus élevé'
+          'Analysé 300 000+ transactions pour mesurer l’impact de nouveaux layouts (KPIs : panier moyen, taux de conversion par zone)',
+          'Automatisé l’attribution des magasins témoins (règles + script SQL) et T-tests (cycle d’analyse -40 % vs manuel)',
+          'Priorisé 4 segments (62 % du potentiel ROI) → projection : +5–7 % du taux de conversion sur zones test'
         ]
       },
       {
@@ -66,9 +64,10 @@ function App() {
         entreprise: 'TRUSTLINE Lyon',
         dates: 'Janvier 2024 à mars 2024',
         details: [
-          "Développement app mobile Flutter (auth, QR code, notifications, cartes) + intégration d'API REST",
-          "Optimisation requêtes & UI (temps de chargement écran principal ~ -30%)",
-          "Structuration JSON -> modèles réutilisables pour future exploitation analytique",
+          "Développé une app mobile Flutter (auth, QR code, notifications, cartes) + intégration API REST (MVP en 6 semaines)",
+          "Optimisé requêtes & UI (temps de chargement écran principal ≈ -30 %)",
+          "Structuré les schémas JSON en modèles réutilisables (réduction dette technique analytique)",
+          "Partagé métriques (sessions, rétention) pour prioriser le backlog (temps d’attente tickets mineurs -20 %)"
         ]
       }
     ],
@@ -78,9 +77,9 @@ function App() {
         entreprise: 'Kaggle Paris',
         dates: '2025',
         details: [
-          "Prédiction des défauts de paiement avec Random Forest (AUC 0.88)",
-          "Réduction des faux positifs, scoring pour équipes credit",
-          "Déploiement : app Streamlit, API prédictive, dashboard Power BI"
+          'Modèle Random Forest de prédiction défaut de paiement (AUC 0.88)',
+          'Réduit les faux positifs de 18 % à rappel constant (allègement revue manuelle)',
+          'Déployé app Streamlit, API prédictive, dashboard Power BI (120+ vues / mois)'
         ]
       },
       {
@@ -88,9 +87,9 @@ function App() {
         entreprise: 'Salif Motors - Google - Certification Paris',
         dates: 'Octobre 2024 à mars 2025',
         details: [
-          "Analyse de données RH de 15 000 employés pour prédire les départs",
-          "Création d’un modèle de départ prédictif (AUC 0.94) pour 150K salariés – Indicateur de surcharge RH et suivi des revues RH mensuelles",
-          "Recommandations RH : promotion, coaching, autres outils, visuels (dashboard Power BI, Streamlit)"
+          'Analysé données RH de 15 000 employés pour anticiper les départs',
+          'Construit un modèle de prédiction des départs (AUC 0.94) couvrant 150 K salariés (indicateur surcharge & suivi mensuel)',
+          'Proposé actions RH (promotions ciblées, coaching, outils) + dashboards (Power BI, Streamlit)'
         ]
       },
       {
@@ -98,8 +97,8 @@ function App() {
         entreprise: 'Kaggle Paris',
         dates: '2025',
         details: [
-          "Analyse de 500 000 lignes de ventes (SQL) pour identifier les produits à faible marge",
-          "Recommandations : +15 % marge nette via ajustement des prix, ciblage promotionnel et priorisation de 10 produits générant 65 % du CA"
+          'Analysé 500 000 lignes de vente (SQL) pour isoler produits à faible marge',
+          'Recommandé ajustements prix & ciblage promo (+15 % marge nette) en priorisant 10 produits (65 % du CA)'
         ]
       }
     ],
@@ -109,7 +108,7 @@ function App() {
         ecole: 'ECE Paris',
         dates: '2025 à 2027',
         details: [
-          "Statistiques, probabilités, algèbre linéaire, Python, SQL, Power BI, Machine Learning, IA explicable, modélisation, déploiement"
+          'Statistiques, probabilités, algèbre linéaire, Python, SQL, Power BI, Machine Learning, IA explicable, modélisation, déploiement'
         ]
       },
       {
@@ -117,7 +116,7 @@ function App() {
         ecole: 'IPSSI Paris',
         dates: '2023 à 2024',
         details: [
-          "Conception applications web et mobiles (React, Flutter, Node.js, Symfony), intégration d’API REST, UX/UI, bases de données SQL/NoSQL"
+          'Conception applications web et mobiles (React, Flutter, Node.js, Symfony), intégration d’API REST, UX/UI, bases de données SQL/NoSQL'
         ]
       },
       {
@@ -125,7 +124,7 @@ function App() {
         ecole: 'IPNET Togo',
         dates: '2020 à 2023',
         details: [
-          "Conception et développement d’applications web et desktop, programmation (Java, Python, C++), bases de données (SQL), modélisation (UML/Merise), gestion de projet Agile"
+          'Conception et développement d’applications web et desktop, programmation (Java, Python, C++), bases de données (SQL), modélisation (UML/Merise), gestion de projet Agile'
         ]
       }
     ]
@@ -147,13 +146,23 @@ function App() {
       const headStyles = Array.from(document.querySelectorAll('link[rel="stylesheet"], style'))
         .map(n=>n.outerHTML).join('\n');
       const cvHtml = cvRef.current.outerHTML;
-      const printCSS = `@page { size:A4; margin:2.8mm 6mm 8mm; }\n` /* top margin further reduced (was 4mm) */
+    const printCSS = `@page { size:A4; margin:2.8mm 6mm 8mm; }\n` /* top margin further reduced (was 4mm) */
         + `:root{--fs:13.8px; --h1:1.85em; --h2:0.99em; --lh:1.28; --secGap:32px; --blockGap:16px; --pGap:23px;}\n`
         + `html,body{background:#fff; -webkit-print-color-adjust:exact; print-color-adjust:exact; font-size:var(--fs);}`
         + `\n.controls,button,textarea{display:none!important;}`
         + `\n.cv-container{box-shadow:none!important; width:${DESIGN_WIDTH_MM}mm!important; max-width:${DESIGN_WIDTH_MM}mm!important; margin:0 auto!important; border-radius:0!important; display:flex;}`
   + `\n.cv-sidebar{flex:0 0 205px; padding:10px 14px 24px; font-size:0.9em;}` /* reduced top padding */
-  + `\n.cv-main{flex:1; padding:12px 20px 30px 22px;}` /* reduced top padding */
+  + `\n.cv-sidebar h4{font-size:0.86em;}`
+  + `\n.cv-sidebar .sidebar-section{font-size:0.8em; line-height:1.16;}`
+  + `\n.cv-sidebar .sidebar-section ul li{margin-bottom:2px;}`
+  + `\n.cv-main{flex:1; padding:12px 20px 30px 22px; font-size:0.92em; line-height:1.24;}` /* further reduced main text */
+  + `\n.cv-sidebar .sidebar-contact{background:#1d2125;border:1px solid #2c3339;border-radius:8px;padding:10px 12px 12px;}`
+  + `\n.cv-sidebar .contact-title{font-size:0.62em;letter-spacing:1px;font-weight:600;color:#ffd166;margin:0 0 6px;}`
+  + `\n.cv-sidebar .contact-item{display:flex;align-items:center;gap:6px;color:#f1f5f9;font-size:0.82em;line-height:1.16;}`
+  + `\n.cv-sidebar .contact-item svg{width:12px;height:12px;stroke:#9cd6ec;stroke-width:1.4;fill:none;}`
+  + `\n.cv-sidebar .contact-item a{color:#dbeffc;text-decoration:none;}`
+  + `\n.cv-sidebar .contact-item:nth-child(2) a, .cv-sidebar .contact-item:nth-child(3) a, .cv-sidebar .contact-item:nth-child(4) a, .cv-sidebar .contact-item:nth-child(5) a{color:#ffd166;font-weight:600;}`
+  + `\n.cv-sidebar .contact-item:nth-child(2) svg, .cv-sidebar .contact-item:nth-child(3) svg, .cv-sidebar .contact-item:nth-child(4) svg, .cv-sidebar .contact-item:nth-child(5) svg{stroke:#ffd166;}`
   + `\n.cv-sidebar .contact-item{display:flex;align-items:center;gap:6px;color:#e2e8f0;font-size:0.82em;line-height:1.14;}`
   + `\n.cv-sidebar .contact-item svg{width:12px;height:12px;stroke:#6fb9d6;stroke-width:1.4;fill:none;}`
   + `\n.cv-sidebar .contact-item a{color:#6fb9d6;text-decoration:none;}`
@@ -161,17 +170,30 @@ function App() {
   + `\n.cv-sidebar .contact-item span{color:#cbd5e1;}`
   + `\n.cv-sidebar .contact-separator{height:1px;background:linear-gradient(90deg,rgba(255,255,255,0.18),rgba(255,255,255,0));margin:4px 0 6px;}`
         + `\n.cv-sidebar, .cv-main{line-height:var(--lh);}`
-  + `\n.cv-main h1{margin:0 0 2px; font-size:var(--h1);}`
-  + `\n.cv-main h2{margin:0 0 8px; font-size:var(--h2);}`
+  + `\n.cv-main h1{margin:0 0 2px; font-size:calc(var(--h1)*0.94);}`
+  + `\n.cv-main h2{margin:0 0 8px; font-size:calc(var(--h2)*0.94);}`
         + `\n.cv-main section{margin-bottom:var(--secGap);}`
         + `\n.cv-experience, .cv-projet, .cv-formation{margin-bottom:var(--blockGap);}`
-        + `\nul{margin-top:6px!important;}`
-        + `\nul li{margin:0 0 6px;}`
+        + `\nul{margin-top:4px!important;}`
+        + `\nul li{margin:0 0 4px;}`
+  + `\n.cv-main .cv-experience ul li, .cv-main .cv-projet ul li, .cv-main .cv-formation ul li{font-size:0.88em; line-height:1.20;}`
+  + `\n.cv-main .cv-formation ul li{font-size:0.82em; line-height:1.15;}`
         + `\n.cv-profile{margin-bottom:13px;}`
         + `\n.cv-description{margin-bottom:var(--pGap);}`
         + `\n.cv-main, .cv-main p, .cv-main li{hyphens:none; word-break:normal; overflow-wrap:anywhere;}`
         + `\na{text-decoration:underline!important;}`;
-      const adaptScript = `<script>(function(){var c=document.querySelector('.cv-container');if(!c){return;}var target=1122*0.97;var h=c.scrollHeight;var docEl=document.documentElement;var fs=parseFloat(getComputedStyle(docEl).fontSize)||14.2;var secGap=34,blockGap=17,pGap=28,lh=1.30;function apply(){docEl.style.setProperty('--fs',fs+'px');docEl.style.setProperty('--secGap',secGap+'px');docEl.style.setProperty('--blockGap',blockGap+'px');docEl.style.setProperty('--pGap',pGap+'px');docEl.style.setProperty('--lh',lh);}apply();var i=0;while(h>target && i<80){if(secGap>26)secGap-=1;else if(blockGap>12)blockGap-=1;else if(pGap>20)pGap-=1;else if(fs>12.2)fs-=0.2;else if(lh>1.22)lh-=0.01;else break;apply();h=c.scrollHeight;i++;}setTimeout(function(){window.print();},60);})();<\/script>`;
+  const adaptScript = `<script>(function(){var c=document.querySelector('.cv-container');if(!c){return;}var target=1122*0.97;var h=c.scrollHeight;var docEl=document.documentElement;var fs=parseFloat(getComputedStyle(docEl).fontSize)||14.2;var secGap=34,blockGap=17,pGap=28,lh=1.30;function apply(){docEl.style.setProperty('--fs',fs+'px');docEl.style.setProperty('--secGap',secGap+'px');docEl.style.setProperty('--blockGap',blockGap+'px');docEl.style.setProperty('--pGap',pGap+'px');docEl.style.setProperty('--lh',lh);}apply();var i=0;while(h>target && i<80){if(secGap>26)secGap-=1;else if(blockGap>12)blockGap-=1;else if(pGap>20)pGap-=1;else if(fs>12.2)fs-=0.2;else if(lh>1.22)lh-=0.01;else break;apply();h=c.scrollHeight;i++;}
+// Compression texte formations + raccourcissements agressifs
+function compressFormations(){document.querySelectorAll('.cv-formation ul li').forEach(function(li){var t=li.textContent.trim();
+  t=t.replace(/Statistiques, probabilités, algèbre linéaire, Python, SQL, Power BI, Machine Learning, IA explicable, modélisation, déploiement/i,'Stats, proba, alg. lin., Python, SQL, Power BI, ML, XAI, modélisation, déploiement');
+  t=t.replace(/Conception applications web et mobiles \(React, Flutter, Node\.js, Symfony\), intégration d’API REST, UX\/UI, bases de données SQL\/NoSQL/i,'Apps web & mobiles (React, Flutter, Node.js, Symfony); APIs REST; UX/UI; SQL & NoSQL');
+  t=t.replace(/Conception et développement d’applications web et desktop, programmation \(Java, Python, C\+\+\), bases de données \(SQL\), modélisation \(UML\/Merise\), gestion de projet Agile/i,'Apps web & desktop; Java, Python, C++; SQL; UML/Merise; Agile');
+  // Si toujours long, couper par segments
+  if(t.length>120){var parts=t.split(/;|,/).map(p=>p.trim()).filter(Boolean);while(parts.join('; ').length>110 && parts.length>4){parts.pop();}t=parts.join('; ');}li.textContent=t;});}
+function trimNewBullets(){var removed=false;var newBullets=[].slice.call(document.querySelectorAll('li.new-bullet'));if(newBullets.length){var last=newBullets[newBullets.length-1];last.parentNode.removeChild(last);removed=true;}return removed;}
+function scaleMain(){var m=document.querySelector('.cv-main');if(!m)return;var base=parseFloat(getComputedStyle(m).fontSize);var current=base;var min=base*0.88;while(c.scrollHeight>target && current>min){current-=0.35;m.style.fontSize=current+'px';m.style.lineHeight='1.21';}}
+function enforce(){var safety=0;while(c.scrollHeight>target && safety<85){if(trimNewBullets()){safety++;continue;}compressFormations();if(c.scrollHeight<=target)break;scaleMain();if(c.scrollHeight<=target)break;if(fs>11.4){fs-=0.12;apply();safety++;continue;}if(lh>1.15){lh-=0.004;apply();safety++;continue;}break;}}
+enforce();setTimeout(function(){window.print();},80);})();<\/script>`;
       doc.write(`<!DOCTYPE html><html><head><title>${title}</title><meta charset='utf-8'/>${headStyles}<style media='print'>${printCSS}</style></head><body>${cvHtml}${adaptScript}</body></html>`);
       doc.close();
       const finalize = () => { printWindow.focus(); printWindow.print(); };
@@ -258,6 +280,26 @@ function App() {
   const [showDebug, setShowDebug] = useState(false);
   const [experienceCible, setExperienceCible] = useState(0);
   const [compact, setCompact] = useState(false); // mode compact auto quand trop de contenu
+  const [sidebarScale, setSidebarScale] = useState(1); // facteur d'expansion sidebar quand moins d'items
+  const sidebarRef = useRef(null);
+  // Ref pour les puces nouvellement ajoutées par suggestions (pour suppression prioritaire si overflow)
+  const newBulletsRef = useRef(new Set());
+  // Référence du bloc principal pour ajustements fins
+  const mainRef = useRef(null);
+  // Étapes de réduction graduelle de la taille du texte principal
+  const MAIN_SCALE_STEPS = [1, 0.97, 0.94, 0.92];
+  const [mainScaleIndex, setMainScaleIndex] = useState(0);
+  const ensuringFitRef = useRef(false);
+  const compressionDoneRef = useRef(false);
+  // Stocker les compétences d'origine pour réinjection si suggestions trop courtes
+  const originalCompetencesRef = useRef(null);
+  if (!originalCompetencesRef.current) {
+    originalCompetencesRef.current = JSON.parse(JSON.stringify(cvData.competences));
+  }
+  const originalExperiencesRef = useRef(null);
+  if (!originalExperiencesRef.current) {
+    originalExperiencesRef.current = JSON.parse(JSON.stringify(cvData.experiences));
+  }
 
   // URL Groq directe (NE PAS exposer une clé sensible en production publique)
   const GROQ_ENDPOINT = 'https://api.groq.com/openai/v1/chat/completions';
@@ -489,10 +531,65 @@ function App() {
         if (next.experiences[idx]) {
           const details = [...next.experiences[idx].details];
           const existing = new Set(details.map(d=>d.toLowerCase()));
-          puces.forEach(p=>{ if (p && !existing.has(p.toLowerCase())) details.push(p); });
+          puces.forEach(p=>{ if (p && !existing.has(p.toLowerCase())) { details.push(p); newBulletsRef.current.add(p); } });
           next.experiences[idx] = { ...next.experiences[idx], details };
         } else {
           next.experiences.push({ poste:'Expérience ajoutée', entreprise:'-', dates:new Date().getFullYear().toString(), details:[...puces] });
+          puces.forEach(p=> newBulletsRef.current.add(p));
+        }
+        // Limitation et synthèse des nouvelles puces
+        const targetIdx = Math.min(experienceCible, next.experiences.length-1);
+        const exp = next.experiences[targetIdx];
+        if (exp) {
+          const baseline = originalExperiencesRef.current?.[targetIdx]?.details?.length || 0;
+          const newAdded = exp.details.slice(baseline).filter(d => newBulletsRef.current.has(d));
+          const MAX_NEW = 3;
+            if (newAdded.length > MAX_NEW) {
+              const keep = newAdded.slice(0, MAX_NEW);
+              const removed = newAdded.slice(MAX_NEW);
+              const metrics = [], themes = [];
+              removed.forEach(txt => {
+                const m = txt.match(/([+\-]?\d+\s?%|\b\d+K\b|AUC\s?0?\.\d+|\b\d+\+?\b)/gi); if (m) metrics.push(...m.slice(0,2));
+                const th = txt.match(/(fidélité|rétention|croissance|ventes|reporting|précision|équipe|présentation)/gi); if (th) themes.push(...th.slice(0,2));
+              });
+              const uniq = a => Array.from(new Set(a));
+              const synth = `Synthèse impacts: ${uniq(metrics).slice(0,3).join(', ') || removed.length + ' items'}${themes.length? ' – ' + uniq(themes).slice(0,3).join(', ') : ''}`;
+              exp.details = [
+                ...exp.details.slice(0, baseline),
+                ...keep,
+                synth
+              ];
+              removed.forEach(r => newBulletsRef.current.delete(r));
+            }
+          // HARD CAP total (exp 0) : maximum 6 lignes après suggestions
+          const MAX_TOTAL_EXP0 = 6;
+          if (targetIdx === 0 && exp.details.length > MAX_TOTAL_EXP0) {
+            const originalBase = originalExperiencesRef.current?.[0]?.details || [];
+            const baseKeep = originalBase.slice(0, Math.min(originalBase.length, MAX_TOTAL_EXP0 - 2)); // garder base mais laisser place à nouvelles & synthèse
+            // Identifier nouvelles restantes après baseKeep
+            const remaining = exp.details.filter(d => !baseKeep.includes(d));
+            const newRemaining = remaining.filter(d => newBulletsRef.current.has(d));
+            const keepNew = newRemaining.slice(0, Math.max(0, MAX_TOTAL_EXP0 - baseKeep.length - 1));
+            const overflow = exp.details.filter(d => !baseKeep.includes(d) && !keepNew.includes(d));
+            if (overflow.length) {
+              const metrics2 = [], themes2 = [];
+              overflow.forEach(txt => {
+                const m = txt.match(/([+\-]?\d+\s?%|\b\d+K\b|AUC\s?0?\.\d+|\b\d+\+?\b)/gi); if (m) metrics2.push(...m.slice(0,2));
+                const th = txt.match(/(fidélité|rétention|croissance|ventes|reporting|précision|équipe|présentation)/gi); if (th) themes2.push(...th.slice(0,2));
+              });
+              const uniq2 = a => Array.from(new Set(a));
+              const synth2 = `Synthèse impacts: ${uniq2(metrics2).slice(0,3).join(', ') || overflow.length + ' items'}${themes2.length? ' – ' + uniq2(themes2).slice(0,3).join(', ') : ''}`;
+              exp.details = [
+                ...baseKeep,
+                ...keepNew,
+                synth2
+              ].slice(0, MAX_TOTAL_EXP0);
+              overflow.forEach(r => newBulletsRef.current.delete(r));
+            } else {
+              // Simple tronquage si pas d'overflow détecté
+              exp.details = exp.details.slice(0, MAX_TOTAL_EXP0);
+            }
+          }
         }
       }
         // Répartition des mots clés dans les catégories existantes
@@ -518,8 +615,110 @@ function App() {
             if (cat && comp[cat]) addUnique(comp[cat], kw);
           });
         }
+        // Fallback si trop peu de compétences: réinjecter anciennes jusqu'à 75% de la cible
+        const countAfter = ['outils','baseDonnees','analyse','visualisation','ia','soft']
+          .reduce((acc,k)=> acc + ((comp[k]||[]).length), 0);
+        if (countAfter < BASE_COMP_COUNT / 2) {
+          const target = Math.ceil(BASE_COMP_COUNT * 0.75);
+          const orig = originalCompetencesRef.current || {};
+          const order = ['outils','baseDonnees','analyse','visualisation','ia','soft'];
+          const addBack = (cat) => {
+            const existingLower = new Set((comp[cat]||[]).map(x=>x.toLowerCase()));
+            (orig[cat]||[]).forEach(item => {
+              if (comp[cat].length >= 50) return; // safety
+              if (existingLower.has(item.toLowerCase())) return;
+              if (['soft'].includes(cat) && comp[cat].length > 8) return; // limiter soft
+              if (totalCount() >= target) return;
+              comp[cat].push(item);
+              existingLower.add(item.toLowerCase());
+            });
+          };
+          const totalCount = () => order.reduce((a,k)=>a+(comp[k]||[]).length,0);
+          for (const cat of order) {
+            if (totalCount() >= target) break;
+            addBack(cat);
+          }
+        }
       return next;
     });
+    // Réinitialiser l'échelle avant tentative d'ajustement
+    setMainScaleIndex(0);
+    // Lancer ajustement de fit après rendu
+    setTimeout(() => { ensureMainFits(); }, 40);
+  };
+
+  // Fonction pour garantir que le bloc principal ne dépasse pas la hauteur cible
+  const ensureMainFits = () => {
+    if (ensuringFitRef.current) return;
+    ensuringFitRef.current = true;
+    const container = cvRef.current;
+    if (!container) { ensuringFitRef.current = false; return; }
+    const MAX_HEIGHT = 1120; // px approx hauteur imprimable (avant script print)
+    const attemptRef = { count: 0 };
+    const step = () => {
+      if (!container) { ensuringFitRef.current = false; return; }
+      const over = container.scrollHeight > MAX_HEIGHT;
+      if (!over) { ensuringFitRef.current = false; return; }
+      // 1. Réduire échelle principale si possible
+      if (mainScaleIndex < MAIN_SCALE_STEPS.length - 1) {
+        setMainScaleIndex(i => i + 1);
+        attemptRef.count++; if (attemptRef.count > 25) { ensuringFitRef.current = false; return; }
+        setTimeout(step, 30);
+        return;
+      }
+      // 1b. Compression textuelle (une seule fois) avant suppression de puces
+      if (!compressionDoneRef.current) {
+        compressionDoneRef.current = true;
+        setCvData(prev => {
+          const next = { ...prev, formations: prev.formations.map(f => ({ ...f, details: [...f.details] })) };
+          // Règles de compression sur la dernière formation (souvent la plus longue)
+          const shorten = (txt) => {
+            let t = txt;
+            t = t.replace(/Conception et développement d’applications web et desktop, programmation \(Java, Python, C\+\+\), bases de données \(SQL\), modélisation \(UML\/Merise\), gestion de projet Agile/i,
+              'Apps web & desktop; Java, Python, C++; SQL; UML/Merise; Gestion Agile');
+            t = t.replace(/Conception applications web et mobiles \(React, Flutter, Node\.js, Symfony\), intégration d’API REST, UX\/UI, bases de données SQL\/NoSQL/i,
+              'Apps web & mobiles (React, Flutter, Node.js, Symfony); APIs REST; UX/UI; SQL & NoSQL');
+            t = t.replace(/Statistiques, probabilités, algèbre linéaire, Python, SQL, Power BI, Machine Learning, IA explicable, modélisation, déploiement/i,
+              'Stats, proba, algèbre linéaire; Python, SQL, Power BI; ML & XAI; Modélisation & déploiement');
+            // Retirer espaces multiples
+            t = t.replace(/\s{2,}/g,' ');
+            return t;
+          };
+          next.formations.forEach(f => {
+            f.details = f.details.map(d => d.length > 160 ? shorten(d) : d);
+          });
+          return next;
+        });
+        attemptRef.count++; if (attemptRef.count > 35) { ensuringFitRef.current = false; return; }
+        setTimeout(step, 50);
+        return;
+      }
+      // 2. Supprimer en dernier recours des puces ajoutées récentes
+      if (newBulletsRef.current.size) {
+        setCvData(prev => {
+          const next = { ...prev, experiences: prev.experiences.map(e => ({ ...e, details: [...e.details] })) };
+          // Stratégie : retirer une puce la plus récente (par ordre d'apparition) appartenant au set
+          outer: for (let ei = 0; ei < next.experiences.length; ei++) {
+            const det = next.experiences[ei].details;
+            for (let di = det.length - 1; di >= 0; di--) {
+              const bullet = det[di];
+              if (newBulletsRef.current.has(bullet)) {
+                det.splice(di,1);
+                newBulletsRef.current.delete(bullet);
+                break outer;
+              }
+            }
+          }
+          return next;
+        });
+        attemptRef.count++; if (attemptRef.count > 40) { ensuringFitRef.current = false; return; }
+        setTimeout(step, 50);
+        return;
+      }
+      // 3. Rien d'autre à faire -> stop (déjà contenu original seulement)
+      ensuringFitRef.current = false;
+    };
+    step();
   };
 
   // Observer la hauteur du CV et activer un mode compact si dépassement (cohérence tailles)
@@ -536,6 +735,18 @@ function App() {
     ro.observe(el);
     return () => ro.disconnect();
   }, [cvData]);
+
+  // Équilibrage visuel de la sidebar : si moins d'items que la base de référence, on dilate les espaces
+  useEffect(() => {
+  const base = BASE_COMP_COUNT; // nombre de lignes de compétences (items) optimal
+    const comp = cvData.competences;
+    const count = (comp.outils?.length||0) + (comp.baseDonnees?.length||0) + (comp.analyse?.length||0) + (comp.visualisation?.length||0) + (comp.ia?.length||0) + (comp.soft?.length||0) + (cvData.certifications?.length||0);
+    let scale = 1;
+    if (count < base) {
+      scale = Math.min(1.4, base / Math.max(1, count));
+    }
+    setSidebarScale(scale);
+  }, [cvData.competences, cvData.certifications]);
 
   return (
     <div>
@@ -603,10 +814,19 @@ function App() {
         <button onClick={()=>handleDownloadPDF('print')} style={{background:'#0d9488',color:'#fff',border:'none',borderRadius:6,padding:'10px 22px',cursor:'pointer'}}>PDF (vector via impression)</button>
   <button onClick={()=>handleDownloadPDF('text')} style={{background:'#6366f1',color:'#fff',border:'none',borderRadius:6,padding:'10px 22px',cursor:'pointer'}}>PDF (texte structuré)</button>
       </div>
-  <div className={`cv-container ${compact ? 'compact' : ''}`} ref={cvRef}>
-      <aside className="cv-sidebar">
+      <div className={`cv-container ${compact ? 'compact' : ''}`} ref={cvRef}>
+      <aside
+        className={`cv-sidebar ${sidebarScale>1.01 ? 'auto-balance' : ''}`}
+        ref={sidebarRef}
+        style={sidebarScale>1.01 ? {
+          '--sb-gap': `${(10*sidebarScale).toFixed(1)}px`,
+          '--sb-li-gap': `${Math.min(6, 2*sidebarScale).toFixed(1)}px`,
+          '--sb-pad-y': `${(26*sidebarScale).toFixed(0)}px`
+        }: undefined}
+      >
         <div className="sidebar-section">
           <div className="sidebar-contact">
+            <div className="contact-title">CONTACT</div>
             <div className="contact-item">
               <svg viewBox="0 0 24 24"><path d="M3 5c0-1.1.9-2 2-2h2.2c.9 0 1.7.6 1.9 1.5l.7 2.8c.2.8-.1 1.6-.7 2.1l-1.2.9c1.2 2.4 3.2 4.4 5.6 5.6l.9-1.2c.5-.6 1.3-.9 2.1-.7l2.8.7c.9.2 1.5 1 1.5 1.9V19c0 1.1-.9 2-2 2h-1C10.7 21 3 13.3 3 4v1z"/></svg>
               <a href={`tel:${cvData.contact.telephone.replace(/\s+/g,'')}`}>{cvData.contact.telephone}</a>
@@ -614,6 +834,14 @@ function App() {
             <div className="contact-item">
               <svg viewBox="0 0 24 24"><path d="M4 5h16c1.1 0 2 .9 2 2v.3l-10 6-10-6V7c0-1.1.9-2 2-2Zm16 5.1V17c0 1.1-.9 2-2 2H6c-1.1 0-2-.9-2-2v-6.9l9 5.4 9-5.4Z"/></svg>
               <a href={`mailto:${cvData.contact.email}`}>{cvData.contact.email}</a>
+            </div>
+            <div className="contact-item">
+              <svg viewBox="0 0 24 24"><path d="M4.98 3.5C4.98 4.88 3.87 6 2.5 6S0 4.88 0 3.5 1.12 1 2.5 1s2.48 1.12 2.48 2.5ZM.5 8h4V23h-4V8Zm7.5 0h3.8v2.04h.05c.53-.95 1.83-1.96 3.76-1.96 4.02 0 4.77 2.64 4.77 6.07V23h-4v-7.7c0-1.84-.03-4.2-2.56-4.2-2.56 0-2.95 2-2.95 4.06V23h-3.87V8Z"/></svg>
+              <a href={cvData.contact.linkedin} target="_blank" rel="noopener noreferrer">LinkedIn</a>
+            </div>
+            <div className="contact-item">
+              <svg viewBox="0 0 24 24"><path d="M12 .5C5.73.5.5 5.74.5 12.02c0 5.1 3.29 9.43 7.86 10.96.58.11.79-.25.79-.56 0-.28-.01-1.03-.02-2.02-3.2.7-3.88-1.54-3.88-1.54-.53-1.36-1.3-1.72-1.3-1.72-1.06-.73.08-.72.08-.72 1.18.08 1.8 1.22 1.8 1.22 1.04 1.79 2.72 1.27 3.38.97.11-.76.41-1.27.74-1.56-2.55-.29-5.23-1.28-5.23-5.7 0-1.26.45-2.29 1.2-3.09-.12-.29-.52-1.47.11-3.06 0 0 .97-.31 3.18 1.18a11.1 11.1 0 0 1 2.9-.39c.99.01 1.99.13 2.92.39 2.2-1.49 3.17-1.18 3.17-1.18.64 1.59.24 2.77.12 3.06.75.8 1.19 1.83 1.19 3.09 0 4.43-2.69 5.4-5.25 5.69.42.37.79 1.09.79 2.2 0 1.59-.02 2.87-.02 3.26 0 .31.21.68.8.56A10.53 10.53 0 0 0 23.5 12C23.5 5.74 18.27.5 12 .5Z"/></svg>
+              <a href={cvData.contact.github} target="_blank" rel="noopener noreferrer">GitHub</a>
             </div>
             <div className="contact-item">
               <svg viewBox="0 0 24 24"><path d="M12 2c3.9 0 7 3 7 6.8 0 5.1-6.2 11-6.5 11.3-.3.3-.8.3-1.1 0C11.2 19.8 5 13.9 5 8.8 5 5 8.1 2 12 2Zm0 3a3.2 3.2 0 0 0-3.2 3.2A3.2 3.2 0 0 0 12 11.4a3.2 3.2 0 0 0 3.2-3.2A3.2 3.2 0 0 0 12 5Z"/></svg>
@@ -634,21 +862,34 @@ function App() {
             ))}
           </ul>
         </div>
-        <div className="sidebar-section">
-          <h4>Compétences</h4>
-          <b>Langages & outils</b>
-          <ul>{cvData.competences.outils.map((c, idx) => <li key={idx}>{c}</li>)}</ul>
-          <b>Base de données</b>
-          <ul>{(cvData.competences.baseDonnees||[]).map((c, idx) => <li key={idx}>{c}</li>)}</ul>
-          <b>Analyse de données</b>
-          <ul>{(cvData.competences.analyse||[]).map((c, idx) => <li key={idx}>{c}</li>)}</ul>
-          <b>Visualisation & storytelling</b>
-          <ul>{(cvData.competences.visualisation||[]).map((c, idx) => <li key={idx}>{c}</li>)}</ul>
-          <b>Machine Learning/IA</b>
-          <ul>{(cvData.competences.ia||[]).map((c, idx) => <li key={idx}>{c}</li>)}</ul>
-          <b>Soft skills</b>
-          <ul>{cvData.competences.soft.map((c, idx) => <li key={idx}>{c}</li>)}</ul>
-        </div>
+        {(() => {
+          const comp = cvData.competences;
+          const catDefs = [
+            { key:'outils', label:'Langages & outils' },
+            { key:'baseDonnees', label:'Base de données' },
+            { key:'analyse', label:'Analyse de données' },
+            { key:'visualisation', label:'Visualisation & storytelling' },
+            { key:'ia', label:'Machine Learning/IA' },
+            { key:'soft', label:'Soft skills' }
+          ];
+          const hasAny = catDefs.some(d => (comp[d.key]||[]).length>0);
+          if (!hasAny) return null;
+          return (
+            <div className="sidebar-section">
+              <h4>Compétences</h4>
+              {catDefs.map(d => {
+                const arr = comp[d.key]||[];
+                if (!arr.length) return null;
+                return (
+                  <div key={d.key} style={{marginBottom:6}}>
+                    <b>{d.label}</b>
+                    <ul style={{marginTop:2}}>{arr.map((c,i)=><li key={i}>{c}</li>)}</ul>
+                  </div>
+                );
+              })}
+            </div>
+          );
+        })()}
         <div className="sidebar-section">
           <h4>Certifications</h4>
           <ul>
@@ -658,7 +899,7 @@ function App() {
           </ul>
         </div>
       </aside>
-      <main className="cv-main">
+  <main className="cv-main" ref={mainRef} style={{ fontSize: `${MAIN_SCALE_STEPS[mainScaleIndex]}em` }}>
         <h1>{cvData.nom}</h1>
         <h2>{cvData.titre}</h2>
   <p className="cv-profile">{cvData.profil}</p>
@@ -670,7 +911,7 @@ function App() {
               <b>{exp.poste}</b> <span>({exp.dates})</span><br />
               <span>{exp.entreprise}</span>
               <ul>
-                {exp.details.map((d, i) => <li key={i}>{d}</li>)}
+                {exp.details.map((d, i) => <li key={i} className={newBulletsRef.current.has(d) ? 'new-bullet' : undefined}>{d}</li>)}
               </ul>
             </div>
           ))}
@@ -682,7 +923,7 @@ function App() {
               <b>{proj.titre}</b> <span>({proj.dates})</span><br />
               <span>{proj.entreprise}</span>
               <ul>
-                {proj.details.map((d, i) => <li key={i}>{d}</li>)}
+                {proj.details.map((d, i) => <li key={i} className={newBulletsRef.current.has(d) ? 'new-bullet' : undefined}>{d}</li>)}
               </ul>
             </div>
           ))}
