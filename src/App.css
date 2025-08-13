@@ -18,10 +18,10 @@ body {
   background: #23272b;
   color: #fff;
   width: 320px;
-  padding: 32px 24px;
+  padding: 26px 22px 26px; /* padding réduit */
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 10px; /* encore plus compact */
 }
 
 .cv-sidebar a {
@@ -30,49 +30,65 @@ body {
 }
 
 .sidebar-section h4 {
-  margin-bottom: 8px;
+  margin: 2px 0 4px; /* réduit l'espace autour du titre */
   color: #ffd166;
-  font-size: 1.1em;
+  font-size: 1.05em;
+  line-height: 1.1;
 }
 .sidebar-section ul {
-  margin: 0 0 12px 0;
-  padding-left: 18px;
+  margin: 0 0 6px 0; /* moins de marge après la liste */
+  padding-left: 16px;
 }
 .sidebar-section b {
   color: #8ecae6;
   font-weight: 500;
 }
 .sidebar-contact {
-  margin-bottom: 16px;
-  font-size: 1em;
+  margin-bottom: 0; /* pas d'espace supplémentaire */
+  font-size: 0.97em;
+  line-height: 1.15;
 }
+.sidebar-contact > div { margin-bottom: 2px; }
+.sidebar-contact > div:last-child { margin-bottom: 0; }
+
+/* Nouveau design contact */
+.sidebar-contact { display:flex; flex-direction:column; gap:4px; }
+.contact-item { display:flex; align-items:center; gap:8px; color:#e2e8f0; text-decoration:none; font-size:0.88em; line-height:1.18; }
+.contact-item svg { width:15px; height:15px; flex-shrink:0; stroke:#6fb9d6; stroke-width:1.5; fill:none; transition:stroke .2s ease, transform .2s ease; }
+.contact-item a { color:#e2e8f0; text-decoration:none; transition:color .2s ease; }
+.contact-item a:hover { color:#ffd166; text-decoration:underline; }
+.contact-item:hover svg { stroke:#ffd166; transform:translateY(-1px); }
+.contact-item span { color:#cbd5e1; }
+.contact-separator { height:1px; background:linear-gradient(90deg,rgba(255,255,255,0.15),rgba(255,255,255,0)); margin:4px 0 6px; }
 
 .cv-main {
   flex: 1;
-  padding: 40px 36px;
+  padding: 28px 32px 36px; /* réduit l'espace haut */
   color: #23272b;
+  font-size: 0.94em; /* réduction globale */
+  line-height: 1.28;
 }
 .cv-main h1 {
-  font-size: 2.2em;
-  margin-bottom: 0;
+  font-size: 2.0em; /* réduit */
+  margin: 0 0 2px 0; /* léger écart */
 }
 .cv-main h2 {
-  font-size: 1.2em;
+  font-size: 1.05em; /* réduit */
   color: #219ebc;
-  margin-top: 0;
-  margin-bottom: 18px;
+  margin: 0 0 8px 0; /* réduit */
 }
 .cv-profile {
-  font-weight: 500;
-  color: #219ebc;
-  margin-bottom: 8px;
+  font-weight: 400; /* normal */
+  color: #23272b; /* texte standard */
+  margin: 0 0 6px; /* paragraphe normal */
+  font-size: 0.9em; /* réduit */
 }
 .cv-description {
-  font-size: 1em;
-  margin-bottom: 24px;
+  font-size: 0.97em;
+  margin-bottom: 14px; /* moins d'espace avant expériences */
 }
 .cv-main section {
-  margin-bottom: 32px;
+  margin-bottom: 28px; /* compact global */
 }
 .cv-main h3 {
   color: #023047;
@@ -84,6 +100,15 @@ body {
 .cv-experience, .cv-projet, .cv-formation {
   margin-bottom: 18px;
 }
+
+/* Mode compact auto quand contenu dépasse une page */
+.cv-container.compact .cv-main { font-size:0.9em; line-height:1.24; }
+.cv-container.compact .cv-main h1 { font-size:1.85em; }
+.cv-container.compact .cv-main h2 { font-size:0.98em; margin-bottom:6px; }
+.cv-container.compact .cv-profile { font-size:0.85em; margin-bottom:4px; }
+.cv-container.compact .cv-main section { margin-bottom:22px; }
+.cv-container.compact .cv-experience, .cv-container.compact .cv-projet, .cv-container.compact .cv-formation { margin-bottom:14px; }
+.cv-container.compact .cv-experience ul, .cv-container.compact .cv-projet ul, .cv-container.compact .cv-formation ul { margin-top:4px; }
 .cv-experience b, .cv-projet b, .cv-formation b {
   color: #219ebc;
 }

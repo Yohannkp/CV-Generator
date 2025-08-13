@@ -1,6 +1,6 @@
 
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import './App.css';
@@ -9,45 +9,56 @@ function App() {
   // Données du CV inspirées du design fourni (rendent éditables via setCvData)
   const [cvData, setCvData] = useState({
     nom: 'Yohann YENDI',
-    titre: 'Alternant Data – Expert en Power BI, Python, scoring & recommandations impactantes',
+  titre: 'Alternant Data – Power BI | Python | Scoring & Analyses Actionnables',
     contact: {
       telephone: '06 45 86 35 33',
       email: 'yendiyohann@gmail.com',
       adresse: 'Paris (75000)',
-      linkedin: 'https://www.datascienceportfol.io/yendiyohann',
-      permis: 'Permis B'
+      linkedin: 'https://www.linkedin.com/in/yohannkp',
+      portfolio: 'https://www.datascienceportfol.io/yendiyohann'
+      // Permis B supprimé de l'affichage prioritaire (faible valeur ATS)
     },
     langues: [
       { nom: 'Français', niveau: 'Natif' },
       { nom: 'Anglais', niveau: 'Intermédiaire' }
     ],
     reseaux: [
-      { nom: '@Yohannkp', type: 'Twitter' },
-      { nom: '@Yohannkp', type: 'LinkedIn' }
+      // Réseaux personnels retirés (peu d'impact ATS). Garder LinkedIn déjà dans contact.
     ],
     competences: {
-      outils: ['SQL', 'Python (Pandas, Matplotlib, Scikit-learn)', 'Power BI', 'Excel', 'Power query'],
-      baseDonnees: ['Modélisation relationnelle', 'jointures complexes', 'optimisation de requêtes'],
-      analyse: ['EDA', 'KPIs', 'corrélations', 'A/B Testing', 'scoring', 'modélisation prédictive'],
-      visualisation: ['Dashboards dynamiques', 'Data Visualization Tools', 'Data storytelling', 'rapports client (Pyramid Principle)', 'Data Visualization'],
-      ia: ['Classification', 'régression', 'Random Forest', 'XGBoost', 'Streamlit', 'Data Sets', 'Data Models'],
-      soft: ['Esprit analytique & sens business', 'Communication claire & vulgarisation', 'Curiosité & veille technologique', 'Autonomie & gestion des priorités', 'Travail en équipe & adaptabilité']
+      outils: [
+        'Python (Pandas, Matplotlib, Scikit-learn)',
+        'SQL (PostgreSQL, MySQL)',
+        'Power BI',
+        'Power Query / Excel avancé',
+        'Git'
+      ],
+      // Garder anciens identifiants utilisés par le rendu et la logique suggestions pour éviter les erreurs
+      baseDonnees: ['Modélisation relationnelle', 'Jointures complexes', 'Optimisation requêtes', 'Indexation'],
+      ia: ['Classification', 'Régression', 'Random Forest', 'XGBoost', 'Feature engineering'],
+      // Nouvelles catégories (alias) – pourront être exploitées plus tard
+      dataEngineering: ['Modélisation relationnelle', 'Jointures complexes', 'Optimisation requêtes', 'Indexation'],
+      ml: ['Classification', 'Régression', 'Random Forest', 'XGBoost', 'Feature engineering'],
+      analyse: ['EDA', 'KPIs & métriques business', 'A/B Testing', 'Scoring', 'Modélisation prédictive', 'Segmentation clients', 'Analyse rétention'],
+      visualisation: ['Dashboards Power BI', 'Data storytelling', 'Pyramid Principle', 'Rapports automatisés'],
+      business: ['Recueil des besoins', 'Gestion parties prenantes', 'Amélioration de processus', 'Priorisation ROI', 'Analyse fonctionnelle'],
+      soft: ['Analyse & sens business', 'Communication claire', 'Vulgarisation', 'Proactivité & autonomie', 'Travail en équipe']
     },
     certifications: [
       'Google Advanced Data Analytics',
       'IBM Data Analyst'
     ],
-    profil: "Data Analyst orienté business avec expertise en fidélisation, scoring client et prise de décision basée sur les données. Recherche alternance avec impact direct sur les performances.",
-    description: "Curieux, rigoureux et autonome, j’avance vite et n’attends pas qu’on me dise quoi faire. Mes points forts : vulgarisation, sens métier, livrables clairs et utiles. Ce que je vous apporte : un regard analytique, des outils opérationnels (Python, SQL, Power BI), et des recommandations directement activables.",
+  profil: "Data Analyst orienté business : fidélisation, scoring client, aide à la décision. Je traduis les besoins métier en indicateurs et décisions actionnables (Python, SQL, Power BI) et recherche une alternance à fort impact sur la performance.",
+  description: "",
     experiences: [
       {
         poste: 'Data Analyst – Analyse comportementale retail',
         entreprise: 'Quantum – Simulation pro Paris',
         dates: '2025',
         details: [
-          "Analyse de 300 000+ transactions pour évaluer l’impact de nouveaux layouts en magasin",
-          "Attribution automatique de contrôle magasins, T-tests sur magasins tests",
-          "Recommandations stratégiques pour le déploiement ciblé du nouveau layout"
+          'Analyse de 300 000+ transactions pour évaluer l’impact de nouveaux layouts (KPIs : panier moyen, conversion zone)',
+          'Attribution automatique des magasins de contrôle (règles + script SQL) & T-tests sur magasins tests',
+          'Recommandations stratégiques priorisant le déploiement sur segments à ROI le plus élevé'
         ]
       },
       {
@@ -55,11 +66,9 @@ function App() {
         entreprise: 'TRUSTLINE Lyon',
         dates: 'Janvier 2024 à mars 2024',
         details: [
-          "Développement app mobile Flutter (auth, QR code, notifications, cartes) + intégration d'API REST sécurisées",
-          "Optimisation UI & requêtes réseau (chargement écran principal ~ -30%)",
-          "Tracking basique des événements d’usage & erreurs (Firebase) + suivi crash rate",
-          "Structuration des réponses JSON en modèles réutilisables pour faciliter analyses ultérieures",
-          "Partage de métriques simples (sessions, rétention hebdo) avec l’équipe produit pour prioriser"
+          "Développement app mobile Flutter (auth, QR code, notifications, cartes) + intégration d'API REST",
+          "Optimisation requêtes & UI (temps de chargement écran principal ~ -30%)",
+          "Structuration JSON -> modèles réutilisables pour future exploitation analytique",
         ]
       }
     ],
@@ -138,16 +147,22 @@ function App() {
       const headStyles = Array.from(document.querySelectorAll('link[rel="stylesheet"], style'))
         .map(n=>n.outerHTML).join('\n');
       const cvHtml = cvRef.current.outerHTML;
-      const printCSS = `@page { size:A4; margin:6mm 6mm 8mm; }\n`
-        + `:root{--fs:14.2px; --h1:2.0em; --h2:1.06em; --lh:1.30; --secGap:34px; --blockGap:17px; --pGap:28px;}\n`
+      const printCSS = `@page { size:A4; margin:2.8mm 6mm 8mm; }\n` /* top margin further reduced (was 4mm) */
+        + `:root{--fs:13.8px; --h1:1.85em; --h2:0.99em; --lh:1.28; --secGap:32px; --blockGap:16px; --pGap:23px;}\n`
         + `html,body{background:#fff; -webkit-print-color-adjust:exact; print-color-adjust:exact; font-size:var(--fs);}`
         + `\n.controls,button,textarea{display:none!important;}`
         + `\n.cv-container{box-shadow:none!important; width:${DESIGN_WIDTH_MM}mm!important; max-width:${DESIGN_WIDTH_MM}mm!important; margin:0 auto!important; border-radius:0!important; display:flex;}`
-        + `\n.cv-sidebar{flex:0 0 205px; padding:24px 14px 26px; font-size:0.9em;}`
-        + `\n.cv-main{flex:1; padding:36px 22px 34px 24px;}`
+  + `\n.cv-sidebar{flex:0 0 205px; padding:10px 14px 24px; font-size:0.9em;}` /* reduced top padding */
+  + `\n.cv-main{flex:1; padding:12px 20px 30px 22px;}` /* reduced top padding */
+  + `\n.cv-sidebar .contact-item{display:flex;align-items:center;gap:6px;color:#e2e8f0;font-size:0.82em;line-height:1.14;}`
+  + `\n.cv-sidebar .contact-item svg{width:12px;height:12px;stroke:#6fb9d6;stroke-width:1.4;fill:none;}`
+  + `\n.cv-sidebar .contact-item a{color:#6fb9d6;text-decoration:none;}`
+  + `\n.cv-sidebar .contact-item a:hover{color:#d4b152;text-decoration:underline;}`
+  + `\n.cv-sidebar .contact-item span{color:#cbd5e1;}`
+  + `\n.cv-sidebar .contact-separator{height:1px;background:linear-gradient(90deg,rgba(255,255,255,0.18),rgba(255,255,255,0));margin:4px 0 6px;}`
         + `\n.cv-sidebar, .cv-main{line-height:var(--lh);}`
-        + `\n.cv-main h1{margin:0 0 8px; font-size:var(--h1);}`
-        + `\n.cv-main h2{margin:0 0 16px; font-size:var(--h2);}`
+  + `\n.cv-main h1{margin:0 0 2px; font-size:var(--h1);}`
+  + `\n.cv-main h2{margin:0 0 8px; font-size:var(--h2);}`
         + `\n.cv-main section{margin-bottom:var(--secGap);}`
         + `\n.cv-experience, .cv-projet, .cv-formation{margin-bottom:var(--blockGap);}`
         + `\nul{margin-top:6px!important;}`
@@ -242,6 +257,7 @@ function App() {
   const [rawGroq, setRawGroq] = useState('');
   const [showDebug, setShowDebug] = useState(false);
   const [experienceCible, setExperienceCible] = useState(0);
+  const [compact, setCompact] = useState(false); // mode compact auto quand trop de contenu
 
   // URL Groq directe (NE PAS exposer une clé sensible en production publique)
   const GROQ_ENDPOINT = 'https://api.groq.com/openai/v1/chat/completions';
@@ -373,8 +389,37 @@ function App() {
           return cleaned.length < 30;
         };
         motsCles.forEach(m=>{ if (keepReason(m)) cleaned.push(m); });
+        // Scoring heuristique pour ne garder que les plus pertinents
+        const offerLower = jobOfferText.toLowerCase();
+        const freqMap = new Map();
+        cleaned.forEach(w=>{
+          const lw = w.toLowerCase();
+          // fréquence approximative (compter occurrences séparées)
+          const re = new RegExp(`\\b${lw.replace(/[-/\\.*+?^${}()|[\]\\]/g,'\\$&')}\\b`, 'g');
+          const matches = offerLower.match(re);
+          freqMap.set(w, matches ? matches.length : 0);
+        });
+        const techBoostPatterns = /(python|sql|power bi|excel|api|kpi|scikit|random forest|xgboost|classification|régression|regression|dashboard|streamlit|feature|etl|cloud|docker|kubernetes|ml|ia|machine learning|segmentation|scoring|forecast|model|modèle)/i;
+        const competenceSets = new Set([
+          ...norm.suggestions.competences.outils.map(s=>s.toLowerCase()),
+          ...norm.suggestions.competences.analyse.map(s=>s.toLowerCase()),
+          ...norm.suggestions.competences.ia.map(s=>s.toLowerCase())
+        ]);
+        const scored = cleaned.map(w=>{
+          const lw = w.toLowerCase();
+            let score = 0;
+            score += (freqMap.get(w)||0) * 3; // poids fréquence
+            if (w.includes(' ')) score += 4; // expression multi-mots
+            if (techBoostPatterns.test(w)) score += 6; // pattern technique
+            if (/^[A-Z0-9]{2,}$/.test(w.replace(/[^A-Z0-9]/g,''))) score += 5; // acronyme
+            if (competenceSets.has(lw)) score += 5; // apparaît dans suggestions compétences
+            if (w.length > 14) score += 1; // termes longs (spécifiques)
+            return { w, score };
+        });
+        scored.sort((a,b)=> b.score - a.score);
+        const topKeywords = scored.slice(0,30).map(o=>o.w);
         const adapted = {
-          motsCles: cleaned.slice(0,50),
+          motsCles: topKeywords,
           suggestions: {
             titre: norm.suggestions.titre,
             competences: norm.suggestions.competences,
@@ -421,28 +466,20 @@ function App() {
     if (!analysis) return;
     // Appliquer compétences + titre + puces sur expérience choisie
     setCvData(prev => {
-      const next = { ...prev, competences: { ...prev.competences }, experiences: [...prev.experiences] };
+  const next = { ...prev, competences: { ...prev.competences }, experiences: [...prev.experiences] };
       const comp = next.competences;
-      const addFrontUnique = (arr, items, max=50) => {
-        if (!Array.isArray(items)) return;
-        const existingLower = new Set(arr.map(a=>a.toLowerCase()));
-        const nouveaux = [];
-        items.forEach(it=>{
-          if (it && !existingLower.has(it.toLowerCase())) {
-            nouveaux.push(it.trim());
-            existingLower.add(it.toLowerCase());
-          }
-        });
-        if (nouveaux.length) {
-          arr.unshift(...nouveaux); // prioriser les nouvelles
-        }
-        if (arr.length>max) arr.splice(max);
-      };
       const sugg = analysis.suggestions || {};
+      // Nouveau comportement : on efface toutes les catégories existantes et on ne garde QUE l'API
+      comp.outils = [];
+      comp.baseDonnees = [];
+      comp.analyse = [];
+      comp.visualisation = [];
+      comp.ia = [];
+      comp.soft = [];
       if (sugg.competences) {
-        addFrontUnique(comp.outils, sugg.competences.outils);
-        addFrontUnique(comp.analyse, sugg.competences.analyse);
-        addFrontUnique(comp.ia, sugg.competences.ia);
+        if (Array.isArray(sugg.competences.outils)) comp.outils = [...sugg.competences.outils];
+        if (Array.isArray(sugg.competences.analyse)) comp.analyse = [...sugg.competences.analyse];
+        if (Array.isArray(sugg.competences.ia)) comp.ia = [...sugg.competences.ia];
       }
       if (sugg.titre) next.titre = sugg.titre;
       // Expériences
@@ -458,9 +495,47 @@ function App() {
           next.experiences.push({ poste:'Expérience ajoutée', entreprise:'-', dates:new Date().getFullYear().toString(), details:[...puces] });
         }
       }
+        // Répartition des mots clés dans les catégories existantes
+        if (analysis.motsCles && analysis.motsCles.length) {
+          const stop = new Set(['carrefour','groupe','f/h','fh','alternance','contexte','datalab','marchands','services','recherche','activement','essor','partenariat']);
+          const addUnique = (arr, term) => {
+            if (!term) return; const t = term.trim(); if (!t) return;
+            if (!arr.some(x=>x.toLowerCase()===t.toLowerCase())) arr.push(t);
+          };
+          const categorize = (kw) => {
+            const k = kw.toLowerCase();
+            if (/python|sql|tableau|power bi|powerbi|excel|spark|d3|nosql|docker|kubernetes|cloud|cloudera|tensor|tensorflow|git/.test(k)) return 'outils';
+            if (/jointure|jointures|index|requete|requêtes|requete|requêtes|modélisation relationnelle|nosql|sql/.test(k)) return 'baseDonnees';
+            if (/segmentation|scoring|analyse|kpi|recommandation|clustering|prédictif|prédictive|predictive|modélisation prédictive|data science|data scientist/.test(k)) return 'analyse';
+              if (/visualisation|dataviz|dashboard|data storytelling|tableau|power bi|d3|rapport|report/.test(k)) return 'visualisation';
+            if (/machine learning|random forest|xgboost|deep learning|nlp|natural language processing|computer vision|tensor|tensorflow|clustering|classification|régression|regression|modélisation prédictive|segmentation/.test(k)) return 'ia';
+            if (/communication|travail en équipe|équipe|team|collabor|proactivité|autonomie|leadership|vulgarisation|sens business/.test(k)) return 'soft';
+            return null;
+          };
+          analysis.motsCles.forEach(kw => {
+            if (!kw) return; const low = kw.toLowerCase(); if (stop.has(low)) return;
+            const cat = categorize(kw);
+            if (cat && comp[cat]) addUnique(comp[cat], kw);
+          });
+        }
       return next;
     });
   };
+
+  // Observer la hauteur du CV et activer un mode compact si dépassement (cohérence tailles)
+  useEffect(() => {
+    const el = cvRef.current;
+    if (!el) return;
+    const threshold = 1180; // px (avant impression, correspond ~ à la hauteur printable)
+    const check = () => {
+      const h = el.scrollHeight;
+      setCompact(h > threshold);
+    };
+    check();
+    const ro = new ResizeObserver(check);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [cvData]);
 
   return (
     <div>
@@ -528,15 +603,27 @@ function App() {
         <button onClick={()=>handleDownloadPDF('print')} style={{background:'#0d9488',color:'#fff',border:'none',borderRadius:6,padding:'10px 22px',cursor:'pointer'}}>PDF (vector via impression)</button>
   <button onClick={()=>handleDownloadPDF('text')} style={{background:'#6366f1',color:'#fff',border:'none',borderRadius:6,padding:'10px 22px',cursor:'pointer'}}>PDF (texte structuré)</button>
       </div>
-      <div className="cv-container" ref={cvRef}>
+  <div className={`cv-container ${compact ? 'compact' : ''}`} ref={cvRef}>
       <aside className="cv-sidebar">
         <div className="sidebar-section">
           <div className="sidebar-contact">
-    <div><b><a href={`tel:${cvData.contact.telephone.replace(/\s+/g,'')}`} style={{color:'#8ecae6', textDecoration:'underline'}}>{cvData.contact.telephone}</a></b></div>
-    <div><a href={`mailto:${cvData.contact.email}`} style={{color:'#8ecae6', textDecoration:'underline'}}>{cvData.contact.email}</a></div>
-            <div>{cvData.contact.adresse}</div>
-            <div><a href={cvData.contact.linkedin} target="_blank" rel="noopener noreferrer">Portfolio</a></div>
-            <div>{cvData.contact.permis}</div>
+            <div className="contact-item">
+              <svg viewBox="0 0 24 24"><path d="M3 5c0-1.1.9-2 2-2h2.2c.9 0 1.7.6 1.9 1.5l.7 2.8c.2.8-.1 1.6-.7 2.1l-1.2.9c1.2 2.4 3.2 4.4 5.6 5.6l.9-1.2c.5-.6 1.3-.9 2.1-.7l2.8.7c.9.2 1.5 1 1.5 1.9V19c0 1.1-.9 2-2 2h-1C10.7 21 3 13.3 3 4v1z"/></svg>
+              <a href={`tel:${cvData.contact.telephone.replace(/\s+/g,'')}`}>{cvData.contact.telephone}</a>
+            </div>
+            <div className="contact-item">
+              <svg viewBox="0 0 24 24"><path d="M4 5h16c1.1 0 2 .9 2 2v.3l-10 6-10-6V7c0-1.1.9-2 2-2Zm16 5.1V17c0 1.1-.9 2-2 2H6c-1.1 0-2-.9-2-2v-6.9l9 5.4 9-5.4Z"/></svg>
+              <a href={`mailto:${cvData.contact.email}`}>{cvData.contact.email}</a>
+            </div>
+            <div className="contact-item">
+              <svg viewBox="0 0 24 24"><path d="M12 2c3.9 0 7 3 7 6.8 0 5.1-6.2 11-6.5 11.3-.3.3-.8.3-1.1 0C11.2 19.8 5 13.9 5 8.8 5 5 8.1 2 12 2Zm0 3a3.2 3.2 0 0 0-3.2 3.2A3.2 3.2 0 0 0 12 11.4a3.2 3.2 0 0 0 3.2-3.2A3.2 3.2 0 0 0 12 5Z"/></svg>
+              <span>{cvData.contact.adresse}</span>
+            </div>
+            <div className="contact-item">
+              <svg viewBox="0 0 24 24"><path d="M4 4h16v2H4V4Zm0 6h10v2H4v-2Zm0 6h16v2H4v-2Zm12-9 4-3v8l-4-3Z"/></svg>
+              <a href={cvData.contact.portfolio} target="_blank" rel="noopener noreferrer">Portfolio</a>
+            </div>
+            <div className="contact-separator" />
           </div>
         </div>
         <div className="sidebar-section">
@@ -548,25 +635,17 @@ function App() {
           </ul>
         </div>
         <div className="sidebar-section">
-          <h4>Réseaux sociaux</h4>
-          <ul>
-            {cvData.reseaux.map((r, idx) => (
-              <li key={idx}>{r.nom}</li>
-            ))}
-          </ul>
-        </div>
-        <div className="sidebar-section">
           <h4>Compétences</h4>
           <b>Langages & outils</b>
           <ul>{cvData.competences.outils.map((c, idx) => <li key={idx}>{c}</li>)}</ul>
           <b>Base de données</b>
-          <ul>{cvData.competences.baseDonnees.map((c, idx) => <li key={idx}>{c}</li>)}</ul>
+          <ul>{(cvData.competences.baseDonnees||[]).map((c, idx) => <li key={idx}>{c}</li>)}</ul>
           <b>Analyse de données</b>
-          <ul>{cvData.competences.analyse.map((c, idx) => <li key={idx}>{c}</li>)}</ul>
+          <ul>{(cvData.competences.analyse||[]).map((c, idx) => <li key={idx}>{c}</li>)}</ul>
           <b>Visualisation & storytelling</b>
-          <ul>{cvData.competences.visualisation.map((c, idx) => <li key={idx}>{c}</li>)}</ul>
+          <ul>{(cvData.competences.visualisation||[]).map((c, idx) => <li key={idx}>{c}</li>)}</ul>
           <b>Machine Learning/IA</b>
-          <ul>{cvData.competences.ia.map((c, idx) => <li key={idx}>{c}</li>)}</ul>
+          <ul>{(cvData.competences.ia||[]).map((c, idx) => <li key={idx}>{c}</li>)}</ul>
           <b>Soft skills</b>
           <ul>{cvData.competences.soft.map((c, idx) => <li key={idx}>{c}</li>)}</ul>
         </div>
@@ -582,8 +661,8 @@ function App() {
       <main className="cv-main">
         <h1>{cvData.nom}</h1>
         <h2>{cvData.titre}</h2>
-        <p className="cv-profile">{cvData.profil}</p>
-        <p className="cv-description">{cvData.description}</p>
+  <p className="cv-profile">{cvData.profil}</p>
+  {cvData.description && <p className="cv-description">{cvData.description}</p>}
         <section>
           <h3>Expérience professionnelle</h3>
           {cvData.experiences.map((exp, idx) => (
