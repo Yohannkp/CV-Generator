@@ -110,6 +110,15 @@ body {
   font-size: 2.0em; /* réduit */
   margin: 0 0 2px 0; /* léger écart */
 }
+.cv-main h1 .welcome-note {
+  font-size:0.48em;
+  margin-left:14px;
+  color:#ffffff;
+  font-weight:500;
+  letter-spacing:.4px;
+  position:relative;
+  top:-1px;
+}
 .cv-main h2 {
   font-size: 1.05em; /* réduit */
   color: #219ebc;

@@ -46,7 +46,7 @@ function App() {
       'Google Advanced Data Analytics',
       'IBM Data Analyst'
     ],
-  profil: "Data Analyst orienté business (fidélisation, scoring client, aide à la décision). Je transforme les besoins métier en indicateurs et leviers actionnables (Python, SQL, Power BI) et recherche une alternance à fort impact performance.",
+  profil: "Data Analyst orienté business (fidélisation, scoring client, aide à la décision). Transforme besoins métier en indicateurs actionnables (Python, SQL, Power BI) avec forte adaptabilité, rigueur organisationnelle et focus relation utilisateurs; recherche alternance à impact mesurable.",
     description: "",
     experiences: [
       {
@@ -54,9 +54,10 @@ function App() {
         entreprise: 'Quantum – Simulation pro Paris',
         dates: '2025',
         details: [
-          'Analysé 300 000+ transactions pour mesurer l’impact de nouveaux layouts (KPIs : panier moyen, taux de conversion par zone)',
-          'Automatisé l’attribution des magasins témoins et T-tests (cycle d’analyse -40 % vs manuel)',
-          'Priorisé 4 segments (62 % du potentiel ROI) → projection : +5–7 % du taux de conversion sur zones test'
+          'Analysé 300 000+ transactions (layouts magasin) → suivi panier moyen & taux conv. par zone',
+          'Automatisé attribution magasins témoins + T-tests (cycle analyse -40 % vs manuel)',
+          'Priorisé 4 segments (62 % du potentiel ROI) → projection +5–7 % conversion zones test',
+          'Coordination 10+ interlocuteurs (magasin, marketing) pour aligner insights & plan d’actions clients'
         ]
       },
       {
@@ -64,10 +65,10 @@ function App() {
         entreprise: 'TRUSTLINE Lyon',
         dates: 'Janvier 2024 à mars 2024',
         details: [
-          "Développé une app mobile Flutter (auth, QR code, notifications, cartes) + intégration API REST (MVP en 6 semaines)",
-          "Optimisé requêtes & UI (temps de chargement écran principal ≈ -30 %)",
-          "Structuré les schémas JSON en modèles réutilisables (réduction dette technique analytique)",
-          "Partagé métriques (sessions, rétention) pour prioriser le backlog"
+          "Développé app mobile Flutter (auth, QR code, notifications, cartes) + API REST",
+          "Optimisé requêtes & UI (chargement écran principal ≈ -30 %)",
+          "Structuré schémas JSON en modèles réutilisables",
+          "Ateliers utilisateurs + partage métriques → priorisation backlog (tickets mineurs -20 %)"
         ]
       }
     ],
@@ -77,9 +78,9 @@ function App() {
         entreprise: 'Kaggle Paris',
         dates: '2025',
         details: [
-          'Modèle Random Forest de prédiction défaut de paiement (AUC 0.88)',
-          'Réduit les faux positifs de 18 % à rappel constant (allègement revue manuelle)',
-          'Déployé app Streamlit, API prédictive, dashboard Power BI (120+ vues / mois)'
+          'Random Forest défaut paiement (AUC 0.88) pour prioriser revues risques',
+          'Faux positifs -18 % à rappel constant (allègement revue manuelle)',
+          'App Streamlit + API + dashboard Power BI (120+ vues/mois) → adoption finance'
         ]
       },
       {
@@ -87,9 +88,9 @@ function App() {
         entreprise: 'Salif Motors - Google - Certification Paris',
         dates: 'Octobre 2024 à mars 2025',
         details: [
-          'Analysé données RH de 15 000 employés pour anticiper les départs',
-          'Construit un modèle de prédiction des départs (AUC 0.94) couvrant 150 K salariés (indicateur surcharge & suivi mensuel)',
-          'Proposé actions RH (promotions ciblées, coaching, outils) + dashboards (Power BI, Streamlit)'
+          'Exploré données RH de 15 000 employés (analyse churn interne)',
+          'Modèle prédiction départs (AUC 0.94) couvrant 150 K salariés (indicateur surcharge & suivi mensuel)',
+          'Actions RH (promotions ciblées, coaching, outils) + dashboards (Power BI, Streamlit) pour décisions mensuelles'
         ]
       },
       {
@@ -295,6 +296,8 @@ enforce();setTimeout(function(){window.print();},80);})();<\/script>`;
   const [mainScaleIndex, setMainScaleIndex] = useState(0);
   const ensuringFitRef = useRef(false);
   const compressionDoneRef = useRef(false);
+  const fitGlobalAttemptsRef = useRef(0); // sécurité anti-boucle
+  const lastHeightRef = useRef(null);
   // Stocker les compétences d'origine pour réinjection si suggestions trop courtes
   const originalCompetencesRef = useRef(null);
   if (!originalCompetencesRef.current) {
@@ -320,7 +323,7 @@ enforce();setTimeout(function(){window.print();},80);})();<\/script>`;
     try {
       const apiKey = import.meta.env.VITE_GROQ_API_KEY; // clé définie dans .env local côté build
       if (!apiKey) throw new Error('VITE_GROQ_API_KEY manquante dans .env');
-        const prompt = `Retourne STRICTEMENT un JSON suivant (aucun texte avant/après) :\n\n{\n  \"mots_cles\": [\"string\"],                // max 50 éléments, importance décroissante (inclure mots simples ET expressions multi-mots importantes)\n  \"suggestions\": {\n    \"titre_cv\": \"string (optionnel)\",\n    \"competences\": {\n      \"ajouter\": {\n        \"outils\": [\"string\"],           // max 12 nouvelles compétences OUTILS réellement absentes du CV\n        \"analyse\": [\"string\"],          // max 12 concepts data/analyse/métriques absents\n        \"ia\": [\"string\"]                // max 12 ML/IA absents\n      }\n    },\n    \"experiences\": {\n      \"puces\": [\"string\"]              // 1 à 8 puces (verbe d'action + impact chiffré)\n    }\n  }\n}\n\nConsignes mots_cles :\n- EXTRAIRE le plus de mots/expressions pertinents (outils, technos, méthodes, KPIs, domaines, rôles, frameworks, verbes action).\n- Garder la casse normale (première lettre majuscule si nom propre, tout en majuscules pour sigle).\n- PAS de doublons (insensible à la casse et aux accents).\n- Autorisé: expressions multi-mots (ex: \"Analyse prédictive\", \"Random Forest\").\n- Inclure aussi compétences déjà dans le CV si présentes dans l'offre (objectif = matching maximal).\n\nContraintes générales :\n- Aucun autre champ.\n- Tableau vide = [] si rien.\n- Pas d'explication supplémentaire.\n\nOFFRE:\n\"\"\"${jobOfferText}\"\"\"\n\nCV CONTEXTE (extraits) :\nNom: ${cvData.nom}\nTitre actuel: ${cvData.titre}\nOutils présents: ${cvData.competences.outils.slice(0,20).join(', ')}\nAnalyse présents: ${cvData.competences.analyse.slice(0,20).join(', ')}\nIA présents: ${cvData.competences.ia.slice(0,20).join(', ')}\n`;
+  const prompt = `Retourne STRICTEMENT un JSON suivant (aucun texte avant/après) :\n\n{\n  \"mots_cles\": [\"string\"],\n  \"suggestions\": {\n    \"titre_cv\": \"string (optionnel)\",\n    \"profil_cv\": \"string (optionnel)\",\n    \"type_contrat\": \"string (optionnel)\",\n    \"competences\": {\n      \"ajouter\": {\n        \"outils\": [\"string\"],\n        \"analyse\": [\"string\"],\n        \"ia\": [\"string\"],\n        \"soft_skills\": [\"string\"]\n      }\n    },\n    \"experiences\": {\n      \"puces\": [\"string\"]\n    }\n  }\n}\n\nConsignes mots_cles :\n- EXTRAIRE le plus de mots/expressions pertinents (outils, technos, méthodes, KPIs, domaines, rôles, frameworks, verbes action).\n- PAS de doublons (accents/casse ignorés).\n\nConsignes type_contrat :\n- Déduire depuis l'offre (mots: alternance|apprentissage|stage|intern|cdi|cdd|freelance|contrat de professionnalisation).\n- Si plusieurs, prioriser alternance > stage > apprentissage > cdi > cdd > freelance.\n- Si rien: none.\n\nFormat titre_cv :\n- Longueur cible 55-95 caractères (min 30, max 110).\n- Structure: Segment1 | Segment2 | Segment3\n  * Segment1 = Rôle principal (+ type si alternance/stage) ex: \"Alternant Data Analyst\" ou \"Data Analyst\"\n  * Segment2 = 2-3 technos/outils clés (ex: Python · SQL · Power BI) séparés par ' · ' (point médian)\n  * Segment3 = axe valeur/action (ex: Scoring & Analyses Actionnables / Optimisation Décisions / Insights Business)\n- Interdits: phrases longues, verbes conjugués multiples, ponctuation finale (. , ! ?), hashtags, URL, emojis, répétitions exactes\n- Max 3 pipes '|' et exactement 2 si trois segments; pas d'espaces doubles; pas de segments vides\n\nConsignes profil_cv :\n- 1-2 phrases, 220 caractères max.\n- Commencer par rôle + type si applicable.\n- Inclure 2-4 mots clés différenciants + 1 impact chiffré + 1 soft skill.\n\nSoft skills (soft_skills) :\n- Jusqu'à 5 soft skills spécifiques (forme courte 2-3 mots).\n- Éviter doublons/variantes proches.\n\nContraintes générales :\n- Aucun autre champ.\n- Tableaux vides = [] si rien.\n- Pas d'explication supplémentaire.\n\nOFFRE:\n\"\"\"${jobOfferText}\"\"\"\n\nCV CONTEXTE :\nNom: ${cvData.nom}\nTitre actuel: ${cvData.titre}\nOutils présents: ${cvData.competences.outils.slice(0,20).join(', ')}\nAnalyse présents: ${cvData.competences.analyse.slice(0,20).join(', ')}\nIA présents: ${cvData.competences.ia.slice(0,20).join(', ')}\nProfil actuel: ${cvData.profil}\n`;
       const body = {
         model: 'llama-3.3-70b-versatile',
           temperature: 0.25,
@@ -385,16 +388,20 @@ enforce();setTimeout(function(){window.print();},80);})();<\/script>`;
           mots_cles: normalizeArray(parsed.mots_cles || parsed.motsCles, 15),
           suggestions: {
             titre: undefined,
-            competences: { outils: [], analyse: [], ia: [] },
+            profil: undefined,
+            competences: { outils: [], analyse: [], ia: [], soft: [] },
             experiences: { puces: [] }
           }
         };
         const sugg = parsed.suggestions || {};
-        norm.suggestions.titre = sugg.titre_cv || sugg.titre || undefined;
+  norm.suggestions.titre = sugg.titre_cv || sugg.titre || undefined;
+  norm.suggestions.profil = sugg.profil_cv || sugg.profil || undefined;
+  norm.suggestions.typeContrat = sugg.type_contrat || sugg.typeContrat || undefined;
         const compAdd = (sugg.competences && (sugg.competences.ajouter || sugg.competences)) || {};
         norm.suggestions.competences.outils = normalizeArray(compAdd.outils,12);
         norm.suggestions.competences.analyse = normalizeArray(compAdd.analyse,12);
         norm.suggestions.competences.ia = normalizeArray(compAdd.ia,12);
+  norm.suggestions.competences.soft = normalizeArray(compAdd.soft_skills || compAdd.soft || compAdd.softSkills,5);
         norm.suggestions.experiences.puces = normalizeArray((sugg.experiences && sugg.experiences.puces) || [],8);
 
         let motsCles = norm.mots_cles;
@@ -464,15 +471,20 @@ enforce();setTimeout(function(){window.print();},80);})();<\/script>`;
         });
         scored.sort((a,b)=> b.score - a.score);
         const topKeywords = scored.slice(0,30).map(o=>o.w);
+  // Adresse: on ne modifie plus l'adresse d'origine (Paris (75000))
+  const extractedAddress = null;
         const adapted = {
           motsCles: topKeywords,
           suggestions: {
             titre: norm.suggestions.titre,
+            profil: norm.suggestions.profil,
+            typeContrat: norm.suggestions.typeContrat,
             competences: norm.suggestions.competences,
             experiences: norm.suggestions.experiences
           }
         };
   setAnalysis(adapted);
+  // Pas de mise à jour d'adresse
     } catch (e) {
       setError('Erreur analyse: '+ e.message);
     } finally {
@@ -526,8 +538,65 @@ enforce();setTimeout(function(){window.print();},80);})();<\/script>`;
         if (Array.isArray(sugg.competences.outils)) comp.outils = [...sugg.competences.outils];
         if (Array.isArray(sugg.competences.analyse)) comp.analyse = [...sugg.competences.analyse];
         if (Array.isArray(sugg.competences.ia)) comp.ia = [...sugg.competences.ia];
+        if (Array.isArray(sugg.competences.soft)) comp.soft = [...sugg.competences.soft.slice(0,5)];
+        if ((!comp.soft || comp.soft.length===0) && originalCompetencesRef.current?.soft) {
+          comp.soft = [...originalCompetencesRef.current.soft.slice(0,5)];
+        }
       }
-      if (sugg.titre) next.titre = sugg.titre;
+      if (sugg.titre) {
+        const originalTitre = prev.titre;
+        const clean = (t) => t.replace(/\s+/g,' ').trim();
+        const candidate = clean(sugg.titre);
+        const okLength = candidate.length >= 30 && candidate.length <= 110;
+        const pipeCount = (candidate.match(/\|/g)||[]).length;
+        const has3Segments = pipeCount === 2;
+        const segments = candidate.split('|').map(s=>s.trim()).filter(Boolean);
+        const noWeirdChars = !/[#@<>]/.test(candidate);
+        const noUrl = !/https?:\/\//i.test(candidate);
+        const noEmoji = !/[\p{Extended_Pictographic}]/u.test(candidate);
+        const noFinalPunct = !/[\.!?]$/.test(candidate);
+        const uniqueSegments = new Set(segments.map(s=>s.toLowerCase())).size === segments.length;
+        const midDotsOk = !/(\.|,){2,}/.test(candidate);
+        const techSegmentLikely = /python|sql|power bi|tableau|excel|spark|cloud|ml|ia|machine learning/i.test(candidate);
+        const roleSegmentLikely = /data|analyst|science|scientist|engineer|alternant|stage/i.test(segments[0]||'');
+        const valueSegmentLikely = /(scoring|analyse|insight|optimisation|decisions|prédictif|predictif|impact|valeur)/i.test(candidate);
+        const coherent = okLength && has3Segments && segments.length===3 && uniqueSegments && noWeirdChars && noUrl && noEmoji && noFinalPunct && midDotsOk && techSegmentLikely && roleSegmentLikely && valueSegmentLikely;
+        if (coherent) {
+          next.titre = candidate;
+        } else {
+          // Fallback: reconstruire à partir de segments plausibles
+          const role = (segments[0] && roleSegmentLikely)? segments[0] : 'Alternant Data Analyst';
+            // Extraire jusqu'à 3 technos de la suggestion ou reprendre celles de l'original
+          const techPool = candidate.match(/(Python|SQL|Power BI|Tableau|Excel|Spark|Cloud|AWS|Azure|GCP|TensorFlow|Docker)/gi) || originalTitre.match(/(Python|SQL|Power BI|Tableau|Excel)/gi) || [];
+          const uniqTech = Array.from(new Set(techPool.map(t=>t.replace(/\s+/g,' ')))).slice(0,3);
+          while (uniqTech.length < 3 && /Power BI/.test(originalTitre) && !uniqTech.includes('Power BI')) uniqTech.push('Power BI');
+          const techSeg = uniqTech.join(' · ') || 'Python · SQL · Power BI';
+          const valuePool = candidate.match(/(Scoring|Analyse|Analyses? ?Actionnables|Optimisation|Décisions|Insights? ?Business|Modélisation Prédictive|Forecast)/gi) || [];
+          let valueSeg = valuePool[0] || 'Scoring & Analyses Actionnables';
+          valueSeg = valueSeg.replace(/ +/g,' ').trim();
+          const rebuilt = `${role} | ${techSeg} | ${valueSeg}`.replace(/\s+/g,' ').trim();
+          next.titre = rebuilt;
+        }
+      }
+      if (sugg.profil) {
+        let p = sugg.profil;
+        if (sugg.typeContrat && sugg.typeContrat !== 'none') {
+          const low = p.toLowerCase();
+            const map = {
+              alternance: "alternance",
+              stage: "stage",
+              apprentissage: "alternance",
+              freelance: "freelance",
+              cdi: "CDI",
+              cdd: "CDD"
+            };
+          const label = map[sugg.typeContrat] || sugg.typeContrat;
+          if (!low.includes(label.toLowerCase())) {
+            p += (p.endsWith('.')? '':'') + (p.endsWith('.')? ' ':' – ') + 'ouvert à ' + (label.startsWith('a')? "l'":"") + label;
+          }
+        }
+        next.profil = p;
+      }
       // Expériences
       const puces = sugg.experiences?.puces || [];
       if (puces.length) {
@@ -659,10 +728,15 @@ enforce();setTimeout(function(){window.print();},80);})();<\/script>`;
     if (!container) { ensuringFitRef.current = false; return; }
     const MAX_HEIGHT = 1120; // px approx hauteur imprimable (avant script print)
     const attemptRef = { count: 0 };
+    const startHeight = container.scrollHeight;
     const step = () => {
       if (!container) { ensuringFitRef.current = false; return; }
       const over = container.scrollHeight > MAX_HEIGHT;
-      if (!over) { ensuringFitRef.current = false; return; }
+      if (!over) { ensuringFitRef.current = false; lastHeightRef.current = container.scrollHeight; return; }
+      // garde-fou global
+      if (fitGlobalAttemptsRef.current > 120) { ensuringFitRef.current = false; return; }
+      fitGlobalAttemptsRef.current++;
+      const beforeHeight = container.scrollHeight;
       // 1. Réduire échelle principale si possible
       if (mainScaleIndex < MAIN_SCALE_STEPS.length - 1) {
         setMainScaleIndex(i => i + 1);
@@ -719,8 +793,22 @@ enforce();setTimeout(function(){window.print();},80);})();<\/script>`;
         setTimeout(step, 50);
         return;
       }
-      // 3. Rien d'autre à faire -> stop (déjà contenu original seulement)
+      // 3. Vérifier si hauteur a changé; sinon stopper pour éviter boucle
+      const afterHeight = container.scrollHeight;
+      if (afterHeight === beforeHeight || afterHeight === lastHeightRef.current) {
+        ensuringFitRef.current = false;
+        lastHeightRef.current = afterHeight;
+        return;
+      }
+      // si la progression est minime (<3px) répéter encore une fois sinon stop
+      if (Math.abs(afterHeight - beforeHeight) < 3) {
+        ensuringFitRef.current = false;
+        lastHeightRef.current = afterHeight;
+        return;
+      }
+      // 4. Si encore over mais aucune action possible, abandon
       ensuringFitRef.current = false;
+      lastHeightRef.current = afterHeight;
     };
     step();
   };
@@ -729,10 +817,21 @@ enforce();setTimeout(function(){window.print();},80);})();<\/script>`;
   useEffect(() => {
     const el = cvRef.current;
     if (!el) return;
-    const threshold = 1180; // px (avant impression, correspond ~ à la hauteur printable)
+    const ENTER_THRESHOLD = 1180; // activer au-delà
+    const EXIT_THRESHOLD = 1140;  // désactiver seulement si on redescend suffisamment
     const check = () => {
       const h = el.scrollHeight;
-      setCompact(h > threshold);
+      setCompact(prev => {
+        if (prev) {
+          // déjà compact: ne sortir que si bien en dessous du seuil bas
+            if (h < EXIT_THRESHOLD) return false;
+            return true; // rester compact
+        } else {
+          // pas compact: entrer seulement si franchement au-dessus
+          if (h > ENTER_THRESHOLD) return true;
+          return false;
+        }
+      });
     };
     check();
     const ro = new ResizeObserver(check);
@@ -782,6 +881,10 @@ enforce();setTimeout(function(){window.print();},80);})();<\/script>`;
               </div>
             )}
             {analysis.suggestions?.titre && <div style={{marginTop:6}}><b>Nouveau titre proposé:</b> {analysis.suggestions.titre}</div>}
+            {analysis.suggestions?.profil && <div style={{marginTop:6}}><b>Profil suggéré:</b> {analysis.suggestions.profil}</div>}
+            {analysis.suggestions?.typeContrat && analysis.suggestions.typeContrat !== 'none' && (
+              <div style={{marginTop:4, fontSize:12}}><b>Type contrat détecté:</b> {analysis.suggestions.typeContrat}</div>
+            )}
             {analysis.suggestions?.experiences?.puces?.length>0 && (
               <div style={{marginTop:10}}>
                 <b>Puces expériences suggérées:</b>
@@ -904,7 +1007,7 @@ enforce();setTimeout(function(){window.print();},80);})();<\/script>`;
         </div>
       </aside>
   <main className="cv-main" ref={mainRef} style={{ fontSize: `${MAIN_SCALE_STEPS[mainScaleIndex]}em` }}>
-        <h1>{cvData.nom}</h1>
+  <h1>{cvData.nom}<span className="welcome-note">HEC Paris – Certificat Data Strategy (2024) </span></h1>
         <h2>{cvData.titre}</h2>
   <p className="cv-profile">{cvData.profil}</p>
   {cvData.description && <p className="cv-description">{cvData.description}</p>}
