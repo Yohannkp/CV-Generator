@@ -94,7 +94,75 @@ function App(){
       // Assigner
       displayedCats.forEach(cat=>{ comp[cat]=catBuffers[cat]; });
       if(sugg.titre) next.titre=sugg.titre.trim();
-      if(sugg.profil) next.profil=sugg.profil.trim();
+      if(sugg.profil){
+        const proposed = sugg.profil.trim();
+        const keepPrev = prev.profil && prev.profil.trim().length > 0 && (proposed.length < 60 && prev.profil.length >= 80);
+        if(!keepPrev) next.profil = proposed;
+      }
+      // Génération / conservation description (accroche secondaire) si vide
+      const hasDescriptionBefore = (prev.description||'').trim().length>0;
+      const stillEmpty = !(next.description||'').trim();
+      if(stillEmpty){
+        if(hasDescriptionBefore){
+          next.description = prev.description; // conserver ancienne
+        } else {
+          // --- Générateur description qualitatif FR ---
+          const motsCle = (analysis?.motsCles||[]).map(m=>m.trim()).filter(Boolean);
+          const lowerSet = new Set(motsCle.map(m=>m.toLowerCase()));
+          // Détection secteur / contexte
+          const secteurPatterns = [
+            {re:/(revenue management|optimisation des revenus)/i, label:'l\'optimisation des revenus'},
+            {re:/(retail|commerce|e-?commerce)/i, label:'le retail et l\'expérience client'},
+            {re:/(tourisme|loisir|parc|hospitality)/i, label:'le tourisme & loisirs'},
+            {re:/(finance|banque|assurance)/i, label:'la finance analytique'},
+            {re:/(rh|ressources humaines)/i, label:'les dynamiques RH'},
+            {re:/(marketing|acquisition)/i, label:'les décisions marketing'},
+            {re:/(supply|logistique)/i, label:'la chaîne opérationnelle'},
+            {re:/(cloud|aws|gcp|azure)/i, label:'des environnements cloud'},
+          ];
+          let secteur = '';
+          for(const p of secteurPatterns){ if(p.re.test(jobOfferText || '')){ secteur = p.label; break; } }
+          if(!secteur){
+            if(lowerSet.has('revenue management')) secteur = 'l\'optimisation des revenus';
+            else if(lowerSet.has('disneyland paris')) secteur = 'l\'expérience parc & loisirs';
+          }
+          // Domaines clés (priorité analyse & IA)
+          const domaines = [];
+          const pushUnique = v=>{ if(v && !domaines.find(d=>d.toLowerCase()===v.toLowerCase())) domaines.push(v); };
+          const pickTop = (arr, n)=> (arr||[]).slice(0,n).forEach(a=>pushUnique(a.replace(/\(.*?\)/,'')));
+          pickTop(comp.analyse,2);
+          pickTop(comp.ia,2);
+          if(domaines.length<2) pickTop(comp.outils,1);
+          // Outils principaux
+          const outilsPrincipaux = (comp.outils||[]).filter(o=>/(Python|SQL|Power BI|Git)/i.test(o)).slice(0,3);
+          // Modèles / techniques
+            const modelWords = (comp.ia||[]).filter(t=>/(Classification|Régression|XGBoost|Random Forest|Deep Learning|Réseaux|Feature engineering)/i.test(t)).slice(0,3);
+          // Objectif business heuristique
+          let objectif='de la prise de décision';
+          if(lowerSet.has('revenue management')) objectif='de l\'optimisation des revenus';
+          else if(lowerSet.has('segmentation')) objectif='de la segmentation & personnalisation';
+          else if(lowerSet.has('scoring')) objectif='du pilotage des scores';
+          // Entreprise / marque
+          let marque='';
+          const m = (jobOfferText||'').match(/([A-Z][A-Za-zéèàùûôïë\-]+(?:\s+[A-Z][A-Za-zéèàùûôïë\-]+){0,2})/);
+          if(m && m[1] && m[1].length>2 && /[A-Za-z]/.test(m[1])) marque = m[1];
+          if(lowerSet.has('disneyland paris')) marque='Disneyland Paris';
+          const titreBase = next.titre || prev.titre || 'Professionnel Data';
+          const phrase1 = `${titreBase} ${domaines.length? 'spécialisé(e) en ' + domaines.join(' & ') : ''}${secteur? ' appliqués à ' + secteur : ''}${marque? ' pour ' + marque : ''}.`;
+          const phrase2 = outilsPrincipaux.length ? `Maîtrise ${outilsPrincipaux.join(', ')} et transforme les données en leviers opérationnels.` : '';
+          const phrase3 = modelWords.length ? `Exploite ${modelWords.join(', ')} pour accélérer ${objectif}.` : `Orienté(e) impact & fiabilité analytique.`;
+          let descriptionFinale = [phrase1, phrase2, phrase3].filter(Boolean).join(' ');
+          // Nettoyage stylistique
+          descriptionFinale = descriptionFinale
+            .replace(/\s+/g,' ') // espaces multiples
+            .replace(/ ,/g,',')
+            .replace(/\.(?=\.)+/g,'.')
+            .trim();
+          // Longueur minimale
+          if(descriptionFinale.length < 120 && hasDescriptionBefore) descriptionFinale = prev.description;
+          next.description = descriptionFinale;
+        }
+      }
 
       const puces=sugg.experiences?.puces||[];
       if(puces.length){
