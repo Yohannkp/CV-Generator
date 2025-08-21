@@ -4,6 +4,68 @@ body {
   font-family: 'Segoe UI', Arial, sans-serif;
 }
 
+/* Zone analyse offre */
+.offer-analysis-container {
+  color:#1e293b;
+}
+.offer-analysis-container h3 { color:#0f172a; }
+.offer-analysis-container b { color:#0f3b57; }
+.offer-analysis-container ul { color:#1e293b; }
+.offer-analysis-container button { font-size:13px; }
+.offer-analysis-container select { background:#fff; }
+.offer-analysis-container .analysis-keywords { font-size:12px; line-height:1.4; }
+.offer-analysis-container pre { background:#0f172a !important; }
+
+/* Workspace layout */
+.app-workspace { display:flex; align-items:stretch; gap:24px; max-width:1600px; margin:20px auto 40px; padding:0 20px; }
+.panel-left { width:460px; display:flex; flex-direction:column; gap:18px; }
+.panel-header-buttons { display:flex; gap:8px; flex-wrap:wrap; }
+.panel-box { background:#ffffff; border:1px solid #e2e8f0; border-radius:10px; padding:14px 16px 16px; box-shadow:0 2px 6px rgba(0,0,0,0.04); }
+.offer-textarea { width:100%; padding:8px 10px; font-family:inherit; font-size:13px; line-height:1.35; border:1px solid #cbd5e1; border-radius:6px; resize:vertical; background:#fdfefe; }
+.action-row { display:flex; gap:10px; flex-wrap:wrap; margin-top:10px; }
+.analysis-block { margin-top:14px; font-size:12.5px; }
+.analysis-section { margin-bottom:12px; }
+.analysis-section b { display:block; margin-bottom:4px; font-size:12px; letter-spacing:.3px; text-transform:uppercase; color:#0f3b57; }
+.flat-list { margin:4px 0 0 0; padding:0 0 0 14px; }
+.keywords-list { margin-top:4px; background:#f1f5f9; padding:6px 8px; border-radius:6px; border:1px solid #e2e8f0; max-height:110px; overflow:auto; }
+.bullets-preview { margin:6px 0 0 16px; max-height:150px; overflow:auto; }
+.target-exp select { margin-left:6px; padding:2px 4px; font-size:12px; }
+.debug-raw { margin-top:8px; max-height:220px; overflow:auto; background:#0f172a !important; color:#e2e8f0; padding:10px 12px; font-size:11px; border-radius:6px; }
+.pdf-box { padding:12px 16px; }
+.pdf-buttons { display:flex; gap:10px; flex-wrap:wrap; }
+
+/* Buttons */
+.btn { border:none; border-radius:6px; padding:8px 14px; cursor:pointer; font-family:inherit; font-weight:500; letter-spacing:.2px; display:inline-flex; align-items:center; gap:6px; line-height:1; transition:background .25s, box-shadow .25s, transform .15s; }
+.btn.small { padding:6px 10px; font-size:12px; }
+.btn.tiny { padding:4px 8px; font-size:11px; }
+.btn.primary { background:#2563eb; color:#fff; }
+.btn.primary:hover { background:#1d4ed8; }
+.btn.success { background:#059669; color:#fff; }
+.btn.success.disabled { opacity:.55; cursor:not-allowed; }
+.btn.success:not(.disabled):hover { background:#047857; }
+.btn.primary-alt { background:#1e293b; color:#fff; }
+.btn.primary-alt:hover { background:#0f1826; }
+.btn.neutral { background:#334155; color:#fff; }
+.btn.neutral:hover { background:#273549; }
+.btn.danger { background:#be123c; color:#fff; }
+.btn.danger:hover { background:#9f1239; }
+.btn.secondary { background:#475569; color:#fff; }
+.btn.secondary:hover { background:#364152; }
+.btn.info { background:#219ebc; color:#fff; }
+.btn.info:hover { background:#1d829a; }
+.btn.teal { background:#0d9488; color:#fff; }
+.btn.teal:hover { background:#0f766e; }
+.btn.violet { background:#6366f1; color:#fff; }
+.btn.violet:hover { background:#4f46e5; }
+.btn:active { transform:translateY(1px); }
+.btn.disabled:hover { background:inherit; }
+
+@media (max-width:1250px){
+  .app-workspace { flex-direction:column; }
+  .panel-left { width:100%; }
+}
+
+
 .cv-container {
   display: flex;
   max-width: 1100px;

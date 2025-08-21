@@ -20,6 +20,7 @@ function App(){
   const fitAttemptsRef = React.useRef(0);
   const MAIN_SCALE_STEPS = [1,0.97,0.94,0.92];
   const BASE_COMP_COUNT = 33;
+  const [editMode,setEditMode] = React.useState(false);
 
   const ensureMainFits = () => {
     if(ensuringFitRef.current) return; ensuringFitRef.current=true;
@@ -92,6 +93,44 @@ function App(){
     setTimeout(()=>ensureMainFits(),40);
   };
 
+  // --- Edition handlers ---
+  const updateTitre = (val) => setCvData(prev=> ({...prev, titre: val}));
+  const updateProfil = (val) => setCvData(prev=> ({...prev, profil: val}));
+  const updateExperiencePoste = (idx, val) => setCvData(prev=> ({...prev, experiences: prev.experiences.map((e,i)=> i===idx? {...e, poste: val}: e)}));
+  const updateExperienceDetail = (expIdx, detailIdx, val) => setCvData(prev=> ({...prev, experiences: prev.experiences.map((e,i)=> {
+      if(i!==expIdx) return e; const details = e.details.map((d,j)=>{ if(j===detailIdx){
+        if(newBulletsRef.current.has(d)){ newBulletsRef.current.delete(d); newBulletsRef.current.add(val); }
+        return val; } return d; }); return {...e, details}; }) }));
+  const addExperienceDetail = (expIdx) => setCvData(prev=> ({...prev, experiences: prev.experiences.map((e,i)=> i===expIdx? {...e, details:[...e.details, 'Nouvelle réalisation']} : e)}));
+  const removeExperienceDetail = (expIdx, detailIdx) => setCvData(prev=> ({...prev, experiences: prev.experiences.map((e,i)=> {
+      if(i!==expIdx) return e; const details = e.details.filter((_,j)=> j!==detailIdx); return {...e, details}; }) }));
+  // Projets
+  const updateProjetTitre = (idx,val)=> setCvData(prev=> ({...prev, projets: prev.projets.map((p,i)=> i===idx? {...p, titre: val}: p)}));
+  const updateProjetDetail = (projIdx, detailIdx, val)=> setCvData(prev=> ({...prev, projets: prev.projets.map((p,i)=> {
+    if(i!==projIdx) return p; const details = p.details.map((d,j)=> j===detailIdx? val: d); return {...p, details}; }) }));
+  const addProjetDetail = (projIdx)=> setCvData(prev=> ({...prev, projets: prev.projets.map((p,i)=> i===projIdx? {...p, details:[...p.details, 'Nouvelle tâche projet']} : p)}));
+  const removeProjetDetail = (projIdx, detailIdx)=> setCvData(prev=> ({...prev, projets: prev.projets.map((p,i)=> {
+    if(i!==projIdx) return p; const details = p.details.filter((_,j)=> j!==detailIdx); return {...p, details}; }) }));
+  // Formations
+  const updateFormationDiplome = (idx,val)=> setCvData(prev=> ({...prev, formations: prev.formations.map((f,i)=> i===idx? {...f, diplome: val}: f)}));
+  const updateFormationDetail = (formIdx, detailIdx, val)=> setCvData(prev=> ({...prev, formations: prev.formations.map((f,i)=> {
+    if(i!==formIdx) return f; const details = f.details.map((d,j)=> j===detailIdx? val: d); return {...f, details}; }) }));
+  const addFormationDetail = (formIdx)=> setCvData(prev=> ({...prev, formations: prev.formations.map((f,i)=> i===formIdx? {...f, details:[...f.details, 'Nouvel élément formation']} : f)}));
+  const removeFormationDetail = (formIdx, detailIdx)=> setCvData(prev=> ({...prev, formations: prev.formations.map((f,i)=> {
+    if(i!==formIdx) return f; const details = f.details.filter((_,j)=> j!==detailIdx); return {...f, details}; }) }));
+  // Compétences & certifications
+  const updateCompetenceItem = (cat, idx, val)=> setCvData(prev=> ({...prev, competences: {...prev.competences, [cat]: prev.competences[cat].map((c,i)=> i===idx? val: c)}}));
+  const addCompetenceItem = (cat)=> setCvData(prev=> ({...prev, competences: {...prev.competences, [cat]: [...(prev.competences[cat]||[]), 'Nouvelle compétence']}}));
+  const removeCompetenceItem = (cat, idx)=> setCvData(prev=> ({...prev, competences: {...prev.competences, [cat]: prev.competences[cat].filter((_,i)=> i!==idx)}}));
+  const updateCertification = (idx,val)=> setCvData(prev=> ({...prev, certifications: prev.certifications.map((c,i)=> i===idx? val: c)}));
+  const addCertification = ()=> setCvData(prev=> ({...prev, certifications: [...prev.certifications, 'Nouvelle certification']}));
+  const removeCertification = (idx)=> setCvData(prev=> ({...prev, certifications: prev.certifications.filter((_,i)=> i!==idx)}));
+  const updateDescription = (val)=> setCvData(prev=> ({...prev, description: val}));
+  React.useEffect(()=>{ if(editMode) return; // when leaving edit mode refit
+    setTimeout(()=>ensureMainFits(),30);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  },[cvData.experiences, cvData.titre, cvData.profil, editMode]);
+
   React.useEffect(()=>{
     const el=cvRef.current; if(!el) return; const ENTER=1180, EXIT=1140;
     const check=()=>{ const h=el.scrollHeight; setCompact(p=> p ? (h<EXIT?false:true) : (h>ENTER)); };
@@ -103,58 +142,96 @@ function App(){
     setSidebarScale(count < BASE_COMP_COUNT ? Math.min(1.4, BASE_COMP_COUNT/Math.max(1,count)) : 1);
   },[cvData.competences, cvData.certifications]);
 
-  return <div>
-    <div style={{maxWidth:900, margin:'0 auto', display:'flex', justifyContent:'flex-end', padding:'8px 4px'}}>
-      <button onClick={toggleMode} style={{background:'#1e293b', color:'#fff', border:'none', borderRadius:4, padding:'6px 10px', cursor:'pointer', fontSize:12}}>
-        {mode === 'data' ? 'Basculer vers CV Dev' : 'Revenir au CV Data'}
-      </button>
-    </div>
-    <div style={{maxWidth:900, margin:'16px auto', padding:'12px 16px', background:'#f8fafc', border:'1px solid #e2e8f0', borderRadius:8}}>
-      <h3 style={{marginTop:0}}>Offre d'emploi</h3>
-      <textarea placeholder="Collez ici le texte complet de l'offre (mission, profil, compétences...)" value={jobOfferText} onChange={e=>setJobOfferText(e.target.value)} rows={6} style={{width:'100%', padding:8, border:'1px solid #cbd5e1', borderRadius:4, fontFamily:'inherit', fontSize:14, resize:'vertical'}} />
-      <div style={{display:'flex', gap:8, marginTop:8, flexWrap:'wrap', alignItems:'center'}}>
-        <button type="button" onClick={analyserOffre} disabled={loading} style={{background:'#2563eb',color:'#fff',border:'none',padding:'8px 14px',borderRadius:4,cursor:'pointer'}}>{loading? 'Analyse...' : 'Analyser l\'offre'}</button>
-        <button type="button" onClick={appliquerSuggestions} disabled={!analysis} style={{background: analysis? '#059669':'#94a3b8',color:'#fff',border:'none',padding:'8px 14px',borderRadius:4,cursor: analysis? 'pointer':'not-allowed'}}>Appliquer suggestions</button>
+  return <div className="app-workspace">
+    <div className="panel-left">
+      <div className="panel-header-buttons">
+        <button onClick={toggleMode} className="btn small primary-alt">
+          {mode === 'data' ? 'Basculer vers CV Dev' : 'Revenir au CV Data'}
+        </button>
+        <button onClick={()=>setEditMode(m=>!m)} className={`btn small ${editMode? 'danger':'neutral'}`}>
+          {editMode? 'Quitter édition':'Mode édition'}
+        </button>
       </div>
-      {error && <div style={{color:'#dc2626', marginTop:8, fontSize:13}}>{error}</div>}
-      {analysis && <div style={{marginTop:12, fontSize:13}}>
-        <b>Mots clés extraits:</b> {analysis.motsCles?.join(', ') || ''}<br />
-        {analysis.suggestions?.competences && <div style={{marginTop:6}}>
-          <b>Suggestions compétences:</b>
-          <ul style={{margin:'4px 0 0 16px'}}>
-            {analysis.suggestions.competences.outils?.length>0 && <li>Outils: {analysis.suggestions.competences.outils.join(', ')}</li>}
-            {analysis.suggestions.competences.analyse?.length>0 && <li>Analyse: {analysis.suggestions.competences.analyse.join(', ')}</li>}
-            {analysis.suggestions.competences.ia?.length>0 && <li>IA/ML: {analysis.suggestions.competences.ia.join(', ')}</li>}
-          </ul>
-        </div>}
-        {analysis.suggestions?.titre && <div style={{marginTop:6}}><b>Nouveau titre proposé:</b> {analysis.suggestions.titre}</div>}
-        {analysis.suggestions?.profil && <div style={{marginTop:6}}><b>Profil suggéré:</b> {analysis.suggestions.profil}</div>}
-        {analysis.suggestions?.experiences?.puces?.length>0 && <div style={{marginTop:10}}>
-          <b>Puces expériences suggérées:</b>
-          <div style={{marginTop:4, display:'flex', gap:8, alignItems:'center', flexWrap:'wrap'}}>
-            <label style={{fontSize:12, display:'flex', alignItems:'center', gap:4}}>Cibler expérience:
-              <select value={experienceCible} onChange={e=>setExperienceCible(parseInt(e.target.value,10))} style={{padding:'2px 4px', fontSize:12}}>
-                {cvData.experiences.map((exp,i)=><option key={i} value={i}>{i+1}. {exp.poste.slice(0,40)}</option>)}
-                <option value={cvData.experiences.length}>+ Nouvelle expérience</option>
-              </select>
-            </label>
+      <div className="offer-analysis-container panel-box">
+        <h3 style={{marginTop:0}}>Offre d'emploi</h3>
+        <textarea placeholder="Collez ici le texte complet de l'offre (mission, profil, compétences...)" value={jobOfferText} onChange={e=>setJobOfferText(e.target.value)} rows={10} className="offer-textarea" />
+        <div className="action-row">
+          <button type="button" onClick={analyserOffre} disabled={loading} className="btn primary">{loading? 'Analyse...' : 'Analyser l\'offre'}</button>
+          <button type="button" onClick={appliquerSuggestions} disabled={!analysis} className={`btn success ${!analysis? 'disabled':''}`}>Appliquer suggestions</button>
+        </div>
+        {error && <div className="msg error">{error}</div>}
+        {analysis && <div className="analysis-block">
+          <div className="analysis-section">
+            <b>Mots clés extraits:</b>
+            <div className="keywords-list">{analysis.motsCles?.join(', ') || ''}</div>
           </div>
-          <ul style={{margin:'6px 0 0 16px'}}>
-            {analysis.suggestions.experiences.puces.map((p,i)=><li key={i}>{p}</li>)}
-          </ul>
+          {analysis.suggestions?.competences && <div className="analysis-section">
+            <b>Suggestions compétences:</b>
+            <ul className="flat-list">
+              {analysis.suggestions.competences.outils?.length>0 && <li><span className="tag-label">Outils</span> {analysis.suggestions.competences.outils.join(', ')}</li>}
+              {analysis.suggestions.competences.analyse?.length>0 && <li><span className="tag-label">Analyse</span> {analysis.suggestions.competences.analyse.join(', ')}</li>}
+              {analysis.suggestions.competences.ia?.length>0 && <li><span className="tag-label">IA/ML</span> {analysis.suggestions.competences.ia.join(', ')}</li>}
+            </ul>
+          </div>}
+          {analysis.suggestions?.titre && <div className="analysis-section"><b>Nouveau titre:</b> {analysis.suggestions.titre}</div>}
+          {analysis.suggestions?.profil && <div className="analysis-section"><b>Profil suggéré:</b> {analysis.suggestions.profil}</div>}
+          {analysis.suggestions?.experiences?.puces?.length>0 && <div className="analysis-section">
+            <b>Puces expériences suggérées:</b>
+            <div className="target-exp">
+              <label>Cibler:
+                <select value={experienceCible} onChange={e=>setExperienceCible(parseInt(e.target.value,10))}>
+                  {cvData.experiences.map((exp,i)=><option key={i} value={i}>{i+1}. {exp.poste.slice(0,40)}</option>)}
+                  <option value={cvData.experiences.length}>+ Nouvelle expérience</option>
+                </select>
+              </label>
+            </div>
+            <ul className="bullets-preview">
+              {analysis.suggestions.experiences.puces.map((p,i)=><li key={i}>{p}</li>)}
+            </ul>
+          </div>}
+          <button type="button" onClick={()=>setShowDebug(s=>!s)} className="btn tiny secondary" style={{marginTop:6}}>{showDebug? 'Masquer debug' : 'Voir debug brut'}</button>
+          {showDebug && <pre className="debug-raw">{rawGroq}</pre>}
         </div>}
-        <button type="button" onClick={()=>setShowDebug(s=>!s)} style={{marginTop:8, background:'#475569', color:'#fff', border:'none', padding:'4px 10px', borderRadius:4, cursor:'pointer', fontSize:12}}>{showDebug? 'Masquer debug' : 'Voir debug brut'}</button>
-        {showDebug && <pre style={{marginTop:8, maxHeight:200, overflow:'auto', background:'#0f172a', color:'#f1f5f9', padding:8, fontSize:11, borderRadius:4}}>{rawGroq}</pre>}
-      </div>}
-    </div>
-    <div className="controls" style={{display:'flex', gap:12, justifyContent:'center', marginTop:16, flexWrap:'wrap'}}>
-      <button onClick={()=>handleDownloadPDF('image')} style={{background:'#219ebc',color:'#fff',border:'none',borderRadius:6,padding:'10px 22px',cursor:'pointer'}}>PDF (image rapide)</button>
-      <button onClick={()=>handleDownloadPDF('print')} style={{background:'#0d9488',color:'#fff',border:'none',borderRadius:6,padding:'10px 22px',cursor:'pointer'}}>PDF (vector via impression)</button>
-      <button onClick={()=>handleDownloadPDF('text')} style={{background:'#6366f1',color:'#fff',border:'none',borderRadius:6,padding:'10px 22px',cursor:'pointer'}}>PDF (texte structuré)</button>
+      </div>
+      <div className="panel-box pdf-box">
+        <div className="pdf-buttons">
+          <button onClick={()=>handleDownloadPDF('image')} className="btn info">PDF image</button>
+          <button onClick={()=>handleDownloadPDF('print')} className="btn teal">PDF impression</button>
+          <button onClick={()=>handleDownloadPDF('text')} className="btn violet">PDF texte</button>
+        </div>
+      </div>
     </div>
     <div className={`cv-container ${compact ? 'compact' : ''}`} ref={cvRef}>
       <Sidebar cvData={cvData} sidebarScale={sidebarScale} sidebarRef={null} newBulletsRef={newBulletsRef} />
-      <MainContent cvData={cvData} mainRef={null} mainScale={mainScaleIndex} scaleSteps={MAIN_SCALE_STEPS} newBulletsRef={newBulletsRef} />
+      <MainContent
+        cvData={cvData}
+        mainRef={null}
+        mainScale={mainScaleIndex}
+        scaleSteps={MAIN_SCALE_STEPS}
+        newBulletsRef={newBulletsRef}
+        editMode={editMode}
+        updateTitre={updateTitre}
+        updateProfil={updateProfil}
+        updateExperiencePoste={updateExperiencePoste}
+        updateExperienceDetail={updateExperienceDetail}
+        addExperienceDetail={addExperienceDetail}
+        removeExperienceDetail={removeExperienceDetail}
+        updateProjetTitre={updateProjetTitre}
+        updateProjetDetail={updateProjetDetail}
+        addProjetDetail={addProjetDetail}
+        removeProjetDetail={removeProjetDetail}
+        updateFormationDiplome={updateFormationDiplome}
+        updateFormationDetail={updateFormationDetail}
+        addFormationDetail={addFormationDetail}
+        removeFormationDetail={removeFormationDetail}
+        updateDescription={updateDescription}
+        updateCompetenceItem={updateCompetenceItem}
+        addCompetenceItem={addCompetenceItem}
+        removeCompetenceItem={removeCompetenceItem}
+        updateCertification={updateCertification}
+        addCertification={addCertification}
+        removeCertification={removeCertification}
+      />
     </div>
   </div>;
 }
