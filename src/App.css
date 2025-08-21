@@ -21,7 +21,9 @@ body {
 .panel-left { width:460px; display:flex; flex-direction:column; gap:18px; }
 .panel-header-buttons { display:flex; gap:8px; flex-wrap:wrap; }
 .panel-box { background:#ffffff; border:1px solid #e2e8f0; border-radius:10px; padding:14px 16px 16px; box-shadow:0 2px 6px rgba(0,0,0,0.04); }
-.offer-textarea { width:100%; padding:8px 10px; font-family:inherit; font-size:13px; line-height:1.35; border:1px solid #cbd5e1; border-radius:6px; resize:vertical; background:#fdfefe; }
+.offer-textarea { width:100%; padding:10px 12px; font-family:inherit; font-size:13px; line-height:1.42; border:1px solid #94a3b8; border-radius:8px; resize:vertical; background:#f1f5f9; color:#0f172a; box-shadow:inset 0 1px 2px rgba(0,0,0,0.05); }
+.offer-textarea::placeholder { color:#64748b; opacity:0.9; }
+.offer-textarea:focus { outline:2px solid #2563eb; outline-offset:2px; background:#ffffff; }
 .action-row { display:flex; gap:10px; flex-wrap:wrap; margin-top:10px; }
 .analysis-block { margin-top:14px; font-size:12.5px; }
 .analysis-section { margin-bottom:12px; }

@@ -53,14 +53,46 @@ function App(){
     setCvData(prev=>{
       const next={...prev, competences:{...prev.competences}, experiences:[...prev.experiences]};
       const sugg=analysis.suggestions||{}; const comp=next.competences;
-      // Reset catégories pour insérer celles proposées
-      comp.outils=[]; comp.baseDonnees=[]; comp.analyse=[]; comp.visualisation=[]; comp.ia=[]; comp.soft=[];
-      if(sugg.competences){
-        if(Array.isArray(sugg.competences.outils)) comp.outils=[...sugg.competences.outils];
-        if(Array.isArray(sugg.competences.analyse)) comp.analyse=[...sugg.competences.analyse];
-        if(Array.isArray(sugg.competences.ia)) comp.ia=[...sugg.competences.ia];
-        if(Array.isArray(sugg.competences.soft)) comp.soft=[...sugg.competences.soft.slice(0,5)];
+      // --- Fusion intelligente des compétences ---
+      const TARGET_TOTAL = 30;
+      const displayedCats = ['outils','baseDonnees','analyse','visualisation','ia','soft'];
+      // Normalise structure existante
+      displayedCats.forEach(c=>{ if(!Array.isArray(comp[c])) comp[c]=[]; });
+      const suggestions = (sugg.competences)||{};
+      // Construire liste plate (ordre catégories) : suggestions (protégées) puis base
+      const flat=[]; const seen=new Set(); const lower = s=>s.toLowerCase();
+      // Collect suggestions first category by category
+      displayedCats.forEach(cat=>{
+        const arr=Array.isArray(suggestions[cat])? suggestions[cat]:[];
+        arr.forEach(item=>{ if(item && !seen.has(lower(item))){ flat.push({cat, value:item, suggested:true}); seen.add(lower(item)); } });
+      });
+      // Add base remainder
+      displayedCats.forEach(cat=>{
+        const baseArr=Array.isArray(prev.competences[cat])? prev.competences[cat]:[];
+        baseArr.forEach(item=>{ const key=lower(item); if(item && !seen.has(key)){ flat.push({cat, value:item, suggested:false}); seen.add(key);} });
+      });
+      // Si trop d'éléments, retirer depuis la fin en privilégiant la suppression d'éléments non-suggérés
+      if(flat.length > TARGET_TOTAL){
+        // Retirer non-suggérés d'abord
+        let i=flat.length-1;
+        while(i>=0 && flat.length>TARGET_TOTAL){ if(!flat[i].suggested){ flat.splice(i,1);} i--; }
+        // Si encore trop, retirer même suggérés fin
+        i=flat.length-1; while(i>=0 && flat.length>TARGET_TOTAL){ flat.splice(i,1); i--; }
       }
+      // Pas assez : impossible d'en créer artificiellement, on garde ce qu'on a.
+      // Reconstruire par catégorie en respectant l'ordre filtré
+      const catBuffers = Object.fromEntries(displayedCats.map(c=>[c,[]]));
+      flat.forEach(entry=>{ catBuffers[entry.cat].push(entry.value); });
+      // Limiter soft skills à 5 si dépasse (règle précédente) tout en maintenant target global
+      if(catBuffers.soft.length>5){
+        // Retirer surplus soft depuis la fin (non suggérés d'abord)
+        let j=catBuffers.soft.length-1;
+        while(j>=0 && catBuffers.soft.length>5){ if(!flat.find(f=>f.cat==='soft' && f.value===catBuffers.soft[j] && f.suggested)) { catBuffers.soft.splice(j,1);} j--; }
+        // Si toujours >5, tronquer
+        if(catBuffers.soft.length>5) catBuffers.soft.length=5;
+      }
+      // Assigner
+      displayedCats.forEach(cat=>{ comp[cat]=catBuffers[cat]; });
       if(sugg.titre) next.titre=sugg.titre.trim();
       if(sugg.profil) next.profil=sugg.profil.trim();
 
