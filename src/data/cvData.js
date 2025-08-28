@@ -38,8 +38,11 @@ export const CV_DATA = {
       titre: 'Supermarket Sales Analysis – SQL-Driven Business Insights',
       entreprise: '',
       dates: '',
+      outils: [
+        'SQL'
+      ],
       details: [
-        'SQL Exploration de données',
+        'Exploration de données',
         'Analyse métier',
         'Analyse temporelle',
         'Insights stratégiques',
@@ -51,17 +54,27 @@ export const CV_DATA = {
       titre: 'Prédiction du départ des Employés avec le Machine Learning',
       entreprise: '',
       dates: '',
+      outils: [
+        'pandas', 'scikit-learn', 'matplotlib', 'Streamlit', 'Random Forest', 'Excel'
+      ],
       details: [
-        'pandas', 'scikit-learn', 'matplotlib', 'Streamlit', 'Random Forest', 'analyse exploratoire', 'évaluation AUC', 'dashboard interactif', 'recommandations business', 'Excel',
-        "L'objectif est d'aider les entreprises à mieux comprendre les raisons du départ et à améliorer la rétention des employés grâce à une analyse de données et des modèles prédictifs."
+        'Analyse exploratoire des données RH',
+        'Évaluation AUC des modèles',
+        'Création d’un dashboard interactif',
+        'Recommandations business pour la rétention',
+        "Aide à la compréhension des causes de départ et amélioration de la rétention via modèles prédictifs"
       ]
     },
     {
       titre: 'Finance Analytics - Credit Scoring',
       entreprise: '',
       dates: '',
+      outils: [
+        'Power BI', 'Python', 'Scikit-learn', 'XGBoost', 'SHAP', 'SMOTE', 'Data Visualization', 'Model Evaluation', 'Feature Engineering'
+      ],
       details: [
-        'Power BI', 'Python', 'Scikit-learn', 'XGBoost', 'SHAP', 'SMOTE', 'Data Visualization', 'Model Evaluation', 'Feature Engineering', 'Credit Risk Modeling', 'Fraud Detection',
+        'Credit Risk Modeling',
+        'Fraud Detection',
         "Développement d'un modèle de scoring de crédit pour identifier les clients à risque de défaut de paiement grave. Utilisation de techniques avancées de machine learning et gestion des déséquilibres de classes."
       ]
     },
@@ -69,8 +82,11 @@ export const CV_DATA = {
       titre: 'Optimisation des ventes de chips via l\'analyse comportementale client et A/B testing',
       entreprise: '',
       dates: '',
+      outils: [
+        'Python (Pandas Matplotlib)', 'PowerPoint', 'Visualisation de données', 'Méthodes statistiques', 'A/B testing'
+      ],
       details: [
-        'Python (Pandas Matplotlib)', 'PowerPoint', 'Visualisation de données', 'Méthodes statistiques', 'corrélation magnitude distance', 'A/B testing', 'Analyse client', 'Insight commercial', 'Rapport stratégique',
+        'corrélation magnitude distance', 'Analyse client', 'Insight commercial', 'Rapport stratégique',
         "Analyse complète des données transactionnelles pour un Category Manager en retail, identification des segments clients clés, évaluation de l’impact d’un nouveau layout en magasin à l’aide de tests statistiques."
       ]
     },
@@ -78,28 +94,37 @@ export const CV_DATA = {
       titre: 'Data Scientist – Modélisation du risque client',
       entreprise: 'Kaggle Paris',
       dates: '2025',
+      outils: [
+        'Random Forest', 'Streamlit', 'API', 'Power BI'
+      ],
       details: [
-        'Random Forest défaut paiement (AUC 0.88) pour prioriser revues risques',
+        'Défaut paiement (AUC 0.88) pour prioriser revues risques',
         'Faux positifs -18 % à rappel constant (allègement revue manuelle)',
-        'App Streamlit + API + dashboard Power BI (120+ vues/mois) → adoption finance'
+        'Dashboard Power BI (120+ vues/mois) → adoption finance'
       ]
     },
     {
       titre: 'Data Scientist – Analyse RH prédictive',
       entreprise: 'Salif Motors - Google - Certification Paris',
       dates: 'Octobre 2024 à mars 2025',
+      outils: [
+        'Power BI', 'Streamlit'
+      ],
       details: [
         'Exploré données RH de 15 000 employés (analyse churn interne)',
         "Modèle prédiction départs (AUC 0.94) couvrant 150 K salariés (indicateur surcharge & suivi mensuel)",
-        'Actions RH (promotions ciblées, coaching, outils) + dashboards (Power BI, Streamlit) pour décisions mensuelles'
+        'Actions RH (promotions ciblées, coaching, outils) + dashboards pour décisions mensuelles'
       ]
     },
     {
       titre: 'Data Analyst – Optimisation des ventes et marges',
       entreprise: 'Kaggle Paris',
       dates: '2025',
+      outils: [
+        'SQL'
+      ],
       details: [
-        'Analysé 500 000 lignes de vente (SQL) pour isoler produits à faible marge',
+        'Analysé 500 000 lignes de vente pour isoler produits à faible marge',
         'Recommandé ajustements prix & ciblage promo (+15 % marge nette) en priorisant 10 produits (65 % du CA)'
       ]
     },
@@ -107,6 +132,9 @@ export const CV_DATA = {
       titre: 'Data Analyst – Analyse comportementale retail',
       entreprise: 'Quantum – Simulation pro Paris',
       dates: '2025',
+      outils: [
+        'SQL', 'T-tests'
+      ],
       details: [
         'Analysé 300 000+ transactions (layouts magasin) → suivi panier moyen & taux conv. par zone',
         'Automatisé attribution magasins témoins + T-tests (cycle analyse -40 % vs manuel)',

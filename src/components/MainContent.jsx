@@ -1,4 +1,5 @@
 import React from 'react';
+import { CV_DATA } from '../data/cvData.js';
 
 const MainContent = ({ cvData, mainRef, mainScale, scaleSteps, newBulletsRef, editMode,
   updateTitre, updateProfil,
@@ -49,21 +50,29 @@ const MainContent = ({ cvData, mainRef, mainScale, scaleSteps, newBulletsRef, ed
       </section>
       <section>
         <h3>Projets</h3>
-        {cvData.projets.map((proj, idx) => (
-          <div key={idx} className="cv-projet">
-            <b>{editMode ? <input value={proj.titre} onChange={e=>updateProjetTitre(idx,e.target.value)} style={{width:'100%', border:'1px solid #cbd5e1', borderRadius:4, padding:'1px 4px'}} /> : proj.titre}</b> <span>({proj.dates})</span><br />
-            <span>{proj.entreprise}</span>
-            <ul>
-              {proj.details.map((d, i) => <li key={i}>{editMode ? (
-                <div style={{display:'flex', gap:4}}>
-                  <textarea value={d} onChange={e=>updateProjetDetail(idx,i,e.target.value)} rows={2} style={{flex:1, fontSize:'0.85em', border:'1px solid #cbd5e1', borderRadius:4, padding:4, fontFamily:'inherit'}} />
-                  <button type="button" onClick={()=>removeProjetDetail(idx,i)} style={{background:'#dc2626', color:'#fff', border:'none', borderRadius:4, padding:'2px 6px', cursor:'pointer'}}>×</button>
-                </div>
-              ): d}</li>)}
-              {editMode && <li style={{listStyle:'none', marginTop:4}}><button type="button" onClick={()=>addProjetDetail(idx)} style={{background:'#2563eb', color:'#fff', border:'none', borderRadius:4, padding:'4px 8px', fontSize:12, cursor:'pointer'}}>+ Ajouter une puce</button></li>}
-            </ul>
-          </div>
-        ))}
+        {cvData.projets.map((proj, idx) => {
+          // Compléter les champs manquants à partir de la source d’origine si besoin
+          const projSource = Array.isArray(CV_DATA.projets) ? CV_DATA.projets.find(p => p.titre === proj.titre) : null;
+          const entreprise = proj.entreprise || projSource?.entreprise || '';
+          const dates = proj.dates || projSource?.dates || '';
+          // Affichage conditionnel des parenthèses
+          const showParens = entreprise || dates;
+          return (
+            <div key={idx} className="cv-projet">
+              <b>{editMode ? <input value={proj.titre} onChange={e=>updateProjetTitre(idx,e.target.value)} style={{width:'100%', border:'1px solid #cbd5e1', borderRadius:4, padding:'1px 4px'}} /> : proj.titre}</b>
+              {showParens && <span> ({[dates, entreprise].filter(Boolean).join(' – ')})</span>}
+              <ul>
+                {proj.details && proj.details.map((d, i) => <li key={i}>{editMode ? (
+                  <div style={{display:'flex', gap:4}}>
+                    <textarea value={d} onChange={e=>updateProjetDetail(idx,i,e.target.value)} rows={2} style={{flex:1, fontSize:'0.85em', border:'1px solid #cbd5e1', borderRadius:4, padding:4, fontFamily:'inherit'}} />
+                    <button type="button" onClick={()=>removeProjetDetail(idx,i)} style={{background:'#dc2626', color:'#fff', border:'none', borderRadius:4, padding:'2px 6px', cursor:'pointer'}}>×</button>
+                  </div>
+                ): d}</li>)}
+                {editMode && <li style={{listStyle:'none', marginTop:4}}><button type="button" onClick={()=>addProjetDetail(idx)} style={{background:'#2563eb', color:'#fff', border:'none', borderRadius:4, padding:'4px 8px', fontSize:12, cursor:'pointer'}}>+ Ajouter une puce</button></li>}
+              </ul>
+            </div>
+          );
+        })}
       </section>
       <section>
         <h3>Diplômes et Formations</h3>

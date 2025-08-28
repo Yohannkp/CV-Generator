@@ -1,5 +1,6 @@
 // CLEAN VERSION BELOW
 import React from 'react';
+import { CV_DATA } from './data/cvData.js';
 import Sidebar from './components/Sidebar.jsx';
 import MainContent from './components/MainContent.jsx';
 import { useCvMode } from './hooks/useCvMode.js';
@@ -198,12 +199,11 @@ function App(){
       }
       // --- Application des projets sélectionnés par l’IA si disponibles ---
       if(selectedProjects && Array.isArray(selectedProjects) && selectedProjects.length > 0) {
-        next.projets = selectedProjects.map(p => ({
-          titre: p.titre,
-          entreprise: p.entreprise || '',
-          dates: p.dates || '',
-          details: Array.isArray(p.details) ? p.details : []
-        }));
+        // Pour chaque projet sélectionné, on récupère la version complète d’origine (titre strictement égal)
+        next.projets = selectedProjects.map(pSel => {
+          const pFull = Array.isArray(CV_DATA.projets) ? CV_DATA.projets.find(p0 => p0.titre === pSel.titre) : null;
+          return pFull ? { ...pFull } : { ...pSel };
+        });
       } else {
         // Fallback : filtrage local classique (pondération avancée ML/DL)
         const motsCle = (analysis?.motsCles||[]).map(m=>m.toLowerCase());
