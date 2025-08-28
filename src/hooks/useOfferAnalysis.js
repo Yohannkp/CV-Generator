@@ -1,11 +1,43 @@
+// Nouvelle fonction : sélection des meilleurs projets par l’IA
+export async function selectBestProjectsWithAI(projects, jobOfferText, apiKey) {
+  // Debug : afficher en console les données envoyées à l’IA
+  console.log('[IA][Sélection projets] Projets envoyés :', projects);
+  console.log('[IA][Sélection projets] Offre envoyée :', jobOfferText);
+  const GROQ_ENDPOINT = 'https://api.groq.com/openai/v1/chat/completions';
+  // Même modèle et structure que l’analyse d’offre
+  const prompt = `Voici une liste de projets de portfolio (format JSON) :\n${JSON.stringify(projects, null, 2)}\n\nEt voici une offre d'emploi :\n"""\n${jobOfferText}\n"""\n\nSélectionne simplement les 3 ou 4 projets qui correspondent le plus à cette offre.\n\nRetourne UNIQUEMENT un JSON strict :\n{\n  "projets": [\n    { "titre": "...", "details": ["...", "..."] },\n    ...\n  ]\n}\nPas de texte hors JSON.`;
+  const body = {
+    model: 'llama-3.3-70b-versatile', // identique à l’analyse d’offre
+    temperature: 0.2,
+    max_tokens: 1400,
+    response_format: { type: 'json_object' },
+    messages: [
+      { role: 'system', content: 'Assistant sélection projets CV. Réponds UNIQUEMENT JSON.' },
+      { role: 'user', content: prompt }
+    ]
+  };
+  const resp = await fetch(GROQ_ENDPOINT, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
+    body: JSON.stringify(body)
+  });
+  if (!resp.ok) throw new Error(await resp.text());
+  const data = await resp.json();
+  const content = data.choices?.[0]?.message?.content || '{}';
+  let parsed;
+  try { parsed = JSON.parse(content); } catch { parsed = {}; }
+  return parsed.projets || [];
+}
 import { useState } from 'react';
+import { CV_DATA } from '../data/cvData.js';
+
 
 // Utility helpers
 const uniqLower = (arr) => Array.from(new Map(arr.filter(Boolean).map(v=>[v.toLowerCase(), v.trim()])).values());
 const clampArray = (arr, n) => (Array.isArray(arr)? arr.slice(0,n):[]);
 const safeSplit = (txt, re) => txt.split(re).map(s=>s.trim()).filter(Boolean);
 
-export function useOfferAnalysis(cvData, setCvData){
+export function useOfferAnalysis(cvData, setCvData) {
   const [jobOfferText,setJobOfferText] = useState('');
   const [analysis,setAnalysis] = useState(null);
   const [loading,setLoading] = useState(false);
@@ -13,6 +45,10 @@ export function useOfferAnalysis(cvData, setCvData){
   const [rawGroq,setRawGroq] = useState('');
   const [showDebug,setShowDebug] = useState(false);
   const [experienceCible,setExperienceCible] = useState(0);
+  // Ajout : projets sélectionnés par l’IA
+  const [selectedProjects, setSelectedProjects] = useState(null);
+  // Liste complète des projets d’origine importée directement (jamais modifiée)
+  const allProjects = Array.isArray(CV_DATA.projets) ? CV_DATA.projets : [];
 
   const GROQ_ENDPOINT='https://api.groq.com/openai/v1/chat/completions';
 
@@ -102,6 +138,7 @@ OFFRE:\n${offre}`;
     try {
       const apiKey = import.meta.env.VITE_GROQ_API_KEY;
       if(!apiKey) throw new Error('VITE_GROQ_API_KEY manquante');
+      // Appel principal (analyse CV)
       const prompt = buildPrompt(jobOfferText.slice(0,12000));
       const body = { model:'llama-3.3-70b-versatile', temperature:0.2, max_tokens:1400, response_format:{type:'json_object'}, messages:[{role:'system', content:'Assistant optimisation CV, répond UNIQUEMENT JSON conforme.'},{role:'user', content:prompt}] };
       const resp = await fetch(GROQ_ENDPOINT,{method:'POST', headers:{'Content-Type':'application/json','Authorization':`Bearer ${apiKey}`}, body:JSON.stringify(body)});
@@ -118,6 +155,11 @@ OFFRE:\n${offre}`;
       // Keyword scoring & pruning
       norm.motsCles = scoreKeywords(uniqLower(norm.motsCles), jobOfferText).slice(0,30);
       setAnalysis(norm);
+
+      // Appel parallèle : sélection projets IA (toujours sur la liste complète d’origine importée)
+      selectBestProjectsWithAI(allProjects, jobOfferText, apiKey)
+        .then(projs => setSelectedProjects(projs))
+        .catch(()=>setSelectedProjects(null));
     } catch(e){
       // Fallback entire flow
       try {
@@ -128,8 +170,10 @@ OFFRE:\n${offre}`;
       } catch(inner){
         setError('Erreur analyse: '+e.message);
       }
+      setSelectedProjects(null);
     } finally { setLoading(false); }
   };
 
-  return { jobOfferText,setJobOfferText, analysis, loading, error, rawGroq, showDebug, setShowDebug, experienceCible, setExperienceCible, analyserOffre };
+  // On expose aussi les projets sélectionnés par l’IA
+  return { jobOfferText,setJobOfferText, analysis, loading, error, rawGroq, showDebug, setShowDebug, experienceCible, setExperienceCible, analyserOffre, selectedProjects };
 }

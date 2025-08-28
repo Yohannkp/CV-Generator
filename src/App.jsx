@@ -9,7 +9,7 @@ import './App.css';
 
 function App(){
   const { mode, cvData, setCvData, toggleMode } = useCvMode();
-  const { jobOfferText, setJobOfferText, analysis, loading, error, rawGroq, showDebug, setShowDebug, experienceCible, setExperienceCible, analyserOffre } = useOfferAnalysis(cvData, setCvData);
+  const { jobOfferText, setJobOfferText, analysis, loading, error, rawGroq, showDebug, setShowDebug, experienceCible, setExperienceCible, analyserOffre, selectedProjects } = useOfferAnalysis(cvData, setCvData);
   const cvRef = React.useRef(null);
   const { handleDownloadPDF } = usePdfExport(cvRef, () => cvData);
   const [compact,setCompact] = React.useState(false);
@@ -50,8 +50,17 @@ function App(){
 
   const appliquerSuggestions = () => {
     if(!analysis) return;
+    // Si la sélection IA est attendue mais pas encore reçue, on bloque et informe l’utilisateur
+    if(analysis && selectedProjects === null && loading) {
+      alert('Veuillez patienter : la sélection des projets par l’IA est en cours...');
+      return;
+    }
+    if(selectedProjects) {
+      // Debug : afficher la sélection IA dans la console
+      console.log('Projets sélectionnés par l’IA :', selectedProjects);
+    }
     setCvData(prev=>{
-      const next={...prev, competences:{...prev.competences}, experiences:[...prev.experiences]};
+      const next={...prev, competences:{...prev.competences}, experiences:[...prev.experiences], projets:[...prev.projets]};
       const sugg=analysis.suggestions||{}; const comp=next.competences;
       // --- Fusion intelligente des compétences ---
       const TARGET_TOTAL = 30;
@@ -186,6 +195,48 @@ function App(){
             limited.forEach(p=>newBulletsRef.current.add(p));
           next.experiences.push({ poste:'Expérience ajoutée', entreprise:'-', dates:new Date().getFullYear().toString(), details: limited });
         }
+      }
+      // --- Application des projets sélectionnés par l’IA si disponibles ---
+      if(selectedProjects && Array.isArray(selectedProjects) && selectedProjects.length > 0) {
+        next.projets = selectedProjects.map(p => ({
+          titre: p.titre,
+          entreprise: p.entreprise || '',
+          dates: p.dates || '',
+          details: Array.isArray(p.details) ? p.details : []
+        }));
+      } else {
+        // Fallback : filtrage local classique (pondération avancée ML/DL)
+        const motsCle = (analysis?.motsCles||[]).map(m=>m.toLowerCase());
+        const baseProjects = prev.projets || [];
+        const MIN_PROJECTS = 3, MAX_PROJECTS = 4;
+        const strongKeywords = [
+          'deep learning','machine learning','pytorch','tensorflow','keras','cnn','lstm','rnn','nlp','computer vision','reconnaissance','classification','réseau de neurones','neural network','apprentissage profond','modelisation','modélisation','regression','régression','clustering','reinforcement learning','apprentissage par renforcement','xgboost','random forest','ml','dl'
+        ];
+        const scored = baseProjects.map((proj, idx) => {
+          let score = 0;
+          const titre = (proj.titre||'').toLowerCase();
+          const entreprise = (proj.entreprise||'').toLowerCase();
+          const details = (proj.details||[]).join(' ').toLowerCase();
+          strongKeywords.forEach(sk => {
+            if(titre.includes(sk)) score += 10;
+            if(details.includes(sk)) score += 8;
+          });
+          motsCle.forEach(mot => {
+            if(titre.includes(mot)) score += 3;
+            if(entreprise.includes(mot)) score += 1;
+            if(details.includes(mot)) score += 2;
+          });
+          return { idx, score };
+        });
+        scored.sort((a,b)=>b.score-a.score);
+        let filteredProjects = scored.filter(s=>s.score>0).slice(0,MAX_PROJECTS).map(s=>baseProjects[s.idx]);
+        if(filteredProjects.length < MIN_PROJECTS) {
+          const usedIdx = new Set(filteredProjects.map(p=>baseProjects.indexOf(p)));
+          for(let i=0; i<baseProjects.length && filteredProjects.length<MIN_PROJECTS; ++i) {
+            if(!usedIdx.has(i)) filteredProjects.push(baseProjects[i]);
+          }
+        }
+        next.projets = filteredProjects.slice(0,MAX_PROJECTS);
       }
       return next;
     });
