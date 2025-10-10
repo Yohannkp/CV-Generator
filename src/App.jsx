@@ -9,6 +9,11 @@ import { useOfferAnalysis } from './hooks/useOfferAnalysis.js';
 import './App.css';
 
 function App(){
+  // Suppression manuelle d’un projet
+  const removeProjet = (idx) => setCvData(prev => ({
+    ...prev,
+    projets: prev.projets.filter((_, i) => i !== idx)
+  }));
   const { mode, cvData, setCvData, toggleMode } = useCvMode();
   const { jobOfferText, setJobOfferText, analysis, loading, error, rawGroq, showDebug, setShowDebug, experienceCible, setExperienceCible, analyserOffre, selectedProjects } = useOfferAnalysis(cvData, setCvData);
   const cvRef = React.useRef(null);
@@ -356,35 +361,44 @@ function App(){
       <Sidebar cvData={cvData} sidebarScale={sidebarScale} sidebarRef={null} newBulletsRef={newBulletsRef} />
       <MainContent
         cvData={cvData}
-        mainRef={null}
+        mainRef={cvRef}
         mainScale={mainScaleIndex}
         scaleSteps={MAIN_SCALE_STEPS}
         newBulletsRef={newBulletsRef}
         editMode={editMode}
-        updateTitre={updateTitre}
-        updateProfil={updateProfil}
-        updateExperiencePoste={updateExperiencePoste}
-        updateExperienceDetail={updateExperienceDetail}
-        addExperienceDetail={addExperienceDetail}
-        removeExperienceDetail={removeExperienceDetail}
-        updateProjetTitre={updateProjetTitre}
-        updateProjetDetail={updateProjetDetail}
-        addProjetDetail={addProjetDetail}
-        removeProjetDetail={removeProjetDetail}
-        updateFormationDiplome={updateFormationDiplome}
-        updateFormationDetail={updateFormationDetail}
-        addFormationDetail={addFormationDetail}
-        removeFormationDetail={removeFormationDetail}
-        updateDescription={updateDescription}
-        updateCompetenceItem={updateCompetenceItem}
-        addCompetenceItem={addCompetenceItem}
-        removeCompetenceItem={removeCompetenceItem}
-        updateCertification={updateCertification}
-        addCertification={addCertification}
-        removeCertification={removeCertification}
+        updateTitre={val=>setCvData(prev=>({...prev, titre: val}))}
+        updateProfil={val=>setCvData(prev=>({...prev, profil: val}))}
+        updateExperiencePoste={(idx, val)=>setCvData(prev=>({...prev, experiences: prev.experiences.map((e,i)=> i===idx? {...e, poste: val}: e)}))}
+        updateExperienceDetail={(expIdx, detailIdx, val)=>setCvData(prev=>({...prev, experiences: prev.experiences.map((e,i)=> {
+            if(i!==expIdx) return e; const details = e.details.map((d,j)=>{ if(j===detailIdx){
+              if(newBulletsRef.current.has(d)){ newBulletsRef.current.delete(d); newBulletsRef.current.add(val); }
+              return val; } return d; }); return {...e, details}; }) }))}
+        addExperienceDetail={expIdx=>setCvData(prev=>({...prev, experiences: prev.experiences.map((e,i)=> i===expIdx? {...e, details:[...e.details, 'Nouvelle réalisation']} : e)}))}
+        removeExperienceDetail={(expIdx, detailIdx)=>setCvData(prev=>({...prev, experiences: prev.experiences.map((e,i)=> {
+            if(i!==expIdx) return e; const details = e.details.filter((_,j)=> j!==detailIdx); return {...e, details}; }) }))}
+        updateProjetTitre={(idx,val)=> setCvData(prev=> ({...prev, projets: prev.projets.map((p,i)=> i===idx? {...p, titre: val}: p)}))}
+        updateProjetDetail={(projIdx, detailIdx, val)=> setCvData(prev=> ({...prev, projets: prev.projets.map((p,i)=> {
+          if(i!==projIdx) return p; const details = p.details.map((d,j)=> j===detailIdx? val: d); return {...p, details}; }) }))}
+        addProjetDetail={projIdx=> setCvData(prev=> ({...prev, projets: prev.projets.map((p,i)=> i===projIdx? {...p, details:[...p.details, 'Nouvelle tâche projet']} : p)}))}
+        removeProjetDetail={(projIdx, detailIdx)=> setCvData(prev=> ({...prev, projets: prev.projets.map((p,i)=> {
+          if(i!==projIdx) return p; const details = p.details.filter((_,j)=> j!==detailIdx); return {...p, details}; }) }))}
+        removeProjet={removeProjet}
+        updateFormationDiplome={(idx,val)=> setCvData(prev=> ({...prev, formations: prev.formations.map((f,i)=> i===idx? {...f, diplome: val}: f)}))}
+        updateFormationDetail={(formIdx, detailIdx, val)=> setCvData(prev=> ({...prev, formations: prev.formations.map((f,i)=> {
+          if(i!==formIdx) return f; const details = f.details.map((d,j)=> j===detailIdx? val: d); return {...f, details}; }) }))}
+        addFormationDetail={formIdx=> setCvData(prev=> ({...prev, formations: prev.formations.map((f,i)=> i===formIdx? {...f, details:[...f.details, 'Nouvel élément formation']} : f)}))}
+        removeFormationDetail={(formIdx, detailIdx)=> setCvData(prev=> ({...prev, formations: prev.formations.map((f,i)=> {
+          if(i!==formIdx) return f; const details = f.details.filter((_,j)=> j!==detailIdx); return {...f, details}; }) }))}
+        updateCompetenceItem={(cat, idx, val)=> setCvData(prev=> ({...prev, competences: {...prev.competences, [cat]: prev.competences[cat].map((c,i)=> i===idx? val: c)}}))}
+        addCompetenceItem={cat=> setCvData(prev=> ({...prev, competences: {...prev.competences, [cat]: [...(prev.competences[cat]||[]), 'Nouvelle compétence']}}))}
+        removeCompetenceItem={(cat, idx)=> setCvData(prev=> ({...prev, competences: {...prev.competences, [cat]: prev.competences[cat].filter((_,i)=> i!==idx)}}))}
+        updateCertification={(idx,val)=> setCvData(prev=> ({...prev, certifications: prev.certifications.map((c,i)=> i===idx? val: c)}))}
+        addCertification={()=> setCvData(prev=> ({...prev, certifications: [...prev.certifications, 'Nouvelle certification']}))}
+        removeCertification={idx=> setCvData(prev=> ({...prev, certifications: prev.certifications.filter((_,i)=> i!==idx)}))}
+        updateDescription={val=> setCvData(prev=> ({...prev, description: val}))}
       />
     </div>
-  </div>;
+  </div>
 }
 
 export default App;

@@ -5,7 +5,7 @@ export async function selectBestProjectsWithAI(projects, jobOfferText, apiKey) {
   console.log('[IA][Sélection projets] Offre envoyée :', jobOfferText);
   const GROQ_ENDPOINT = 'https://api.groq.com/openai/v1/chat/completions';
   // Même modèle et structure que l’analyse d’offre
-  const prompt = `Voici une liste de projets de portfolio (format JSON) :\n${JSON.stringify(projects, null, 2)}\n\nEt voici une offre d'emploi :\n"""\n${jobOfferText}\n"""\n\nSélectionne simplement les 3 ou 4 projets qui correspondent le plus à cette offre.\n\nRetourne UNIQUEMENT un JSON strict :\n{\n  "projets": [\n    { "titre": "...", "details": ["...", "..."] },\n    ...\n  ]\n}\nPas de texte hors JSON.`;
+  const prompt = `Voici une liste de projets de portfolio (format JSON) :\n${JSON.stringify(projects, null, 2)}\n\nEt voici une offre d'emploi :\n"""\n${jobOfferText}\n"""\n\nSélectionne simplement les 3 ou 4 projets qui correspondent le plus à cette offre.\n\nIMPORTANT : Le candidat est un homme, utilise toujours le genre masculin dans les intitulés et suggestions (pas de (e)).\n\nRetourne UNIQUEMENT un JSON strict :\n{\n  "projets": [\n    { "titre": "...", "details": ["...", "..."] },\n    ...\n  ]\n}\nPas de texte hors JSON.`;
   const body = {
     model: 'llama-3.3-70b-versatile', // identique à l’analyse d’offre
     temperature: 0.2,

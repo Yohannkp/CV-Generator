@@ -58,9 +58,10 @@ const MainContent = ({ cvData, mainRef, mainScale, scaleSteps, newBulletsRef, ed
           // Affichage conditionnel des parenthèses
           const showParens = entreprise || dates;
           return (
-            <div key={idx} className="cv-projet">
+            <div key={idx} className="cv-projet" style={{position:'relative', paddingRight: editMode ? 32 : undefined}}>
               <b>{editMode ? <input value={proj.titre} onChange={e=>updateProjetTitre(idx,e.target.value)} style={{width:'100%', border:'1px solid #cbd5e1', borderRadius:4, padding:'1px 4px'}} /> : proj.titre}</b>
               {showParens && <span> ({[dates, entreprise].filter(Boolean).join(' – ')})</span>}
+              {editMode && <button type="button" onClick={()=>removeProjet(idx)} style={{position:'absolute', top:2, right:2, background:'#dc2626', color:'#fff', border:'none', borderRadius:4, padding:'2px 8px', fontSize:14, cursor:'pointer'}}>Supprimer</button>}
               <ul>
                 {proj.details && proj.details.map((d, i) => <li key={i}>{editMode ? (
                   <div style={{display:'flex', gap:4}}>
