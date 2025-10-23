@@ -3,7 +3,7 @@ export async function selectBestProjectsWithAI(projects, jobOfferText, apiKey) {
   // Debug : afficher en console les données envoyées à l’IA
   console.log('[IA][Sélection projets] Projets envoyés :', projects);
   console.log('[IA][Sélection projets] Offre envoyée :', jobOfferText);
-  const GROQ_ENDPOINT = 'https://api.groq.com/openai/v1/chat/completions';
+  const GROQ_ENDPOINT = '/api/groq';
   // Même modèle et structure que l’analyse d’offre
   const prompt = `Voici une liste de projets de portfolio (format JSON) :\n${JSON.stringify(projects, null, 2)}\n\nEt voici une offre d'emploi :\n"""\n${jobOfferText}\n"""\n\nSélectionne simplement les 3 ou 4 projets qui correspondent le plus à cette offre.\n\nIMPORTANT : Le candidat est un homme, utilise toujours le genre masculin dans les intitulés et suggestions (pas de (e)).\n\nRetourne UNIQUEMENT un JSON strict :\n{\n  "projets": [\n    { "titre": "...", "details": ["...", "..."] },\n    ...\n  ]\n}\nPas de texte hors JSON.`;
   const body = {
@@ -18,7 +18,7 @@ export async function selectBestProjectsWithAI(projects, jobOfferText, apiKey) {
   };
   const resp = await fetch(GROQ_ENDPOINT, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body)
   });
   if (!resp.ok) throw new Error(await resp.text());
@@ -50,7 +50,7 @@ export function useOfferAnalysis(cvData, setCvData) {
   // Liste complète des projets d’origine importée directement (jamais modifiée)
   const allProjects = Array.isArray(CV_DATA.projets) ? CV_DATA.projets : [];
 
-  const GROQ_ENDPOINT='https://api.groq.com/openai/v1/chat/completions';
+  const GROQ_ENDPOINT='/api/groq';
 
   const buildPrompt = (offre) => `Analyse l'offre suivante et retourne UNIQUEMENT un JSON strict:
 {
@@ -141,7 +141,7 @@ OFFRE:\n${offre}`;
       // Appel principal (analyse CV)
       const prompt = buildPrompt(jobOfferText.slice(0,12000));
       const body = { model:'llama-3.3-70b-versatile', temperature:0.2, max_tokens:1400, response_format:{type:'json_object'}, messages:[{role:'system', content:'Assistant optimisation CV, répond UNIQUEMENT JSON conforme.'},{role:'user', content:prompt}] };
-      const resp = await fetch(GROQ_ENDPOINT,{method:'POST', headers:{'Content-Type':'application/json','Authorization':`Bearer ${apiKey}`}, body:JSON.stringify(body)});
+  const resp = await fetch(GROQ_ENDPOINT,{method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body)});
       if(!resp.ok){ throw new Error(await resp.text()); }
       const data = await resp.json();
       const content = data.choices?.[0]?.message?.content || '{}';
@@ -157,7 +157,7 @@ OFFRE:\n${offre}`;
       setAnalysis(norm);
 
       // Appel parallèle : sélection projets IA (toujours sur la liste complète d’origine importée)
-      selectBestProjectsWithAI(allProjects, jobOfferText, apiKey)
+    selectBestProjectsWithAI(allProjects, jobOfferText, apiKey)
         .then(projs => setSelectedProjects(projs))
         .catch(()=>setSelectedProjects(null));
     } catch(e){
