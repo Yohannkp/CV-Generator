@@ -91,25 +91,5 @@ server/
 
 MIT. Voir `LICENSE` si ajoutée ultérieurement.
 
+---
 Contributions et issues bienvenues.
-
-## ✍️ Personnalisation par upload (nouvelle page)
-
-Une nouvelle page `/personalize` permet d'uploader un CV (PDF / DOCX). Le fichier est envoyé au endpoint `POST /api/personalize` et le serveur renvoie une mini-base JSON (titre, profil, compétences, expériences, projets) utilisable pour pré-remplir le template.
-
-Côté serveur, un stub est fourni dans `server/server.js` qui sauvegarde le fichier dans `server/uploads` et renvoie un JSON simulé. En production, remplacez la logique par un parseur de CV + appel LLM.
-
-Variables d'environnement recommandées:
-- `OPENAI_API_KEY` ou `VITE_GROQ_API_KEY` selon votre implémentation LLM.
-
-Pour tester localement:
-
-```powershell
-# Installer dépendances (si nécessaire)
-npm install
-# Lancer le serveur express (dans un terminal)
-node server/server.js
-# Dans un autre terminal lancer l'app (vite)
-npm run dev
-# Ouvrir http://localhost:5173/personalize
-```
