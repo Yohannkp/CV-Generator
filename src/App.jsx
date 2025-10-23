@@ -3,6 +3,7 @@ import React from 'react';
 import { CV_DATA } from './data/cvData.js';
 import Sidebar from './components/Sidebar.jsx';
 import MainContent from './components/MainContent.jsx';
+import PersonalizePage from './PersonalizePage.jsx';
 import { useCvMode } from './hooks/useCvMode.js';
 import { usePdfExport } from './hooks/usePdfExport.js';
 import { useOfferAnalysis } from './hooks/useOfferAnalysis.js';
@@ -27,6 +28,20 @@ function App(){
   const MAIN_SCALE_STEPS = [1,0.97,0.94,0.92];
   const BASE_COMP_COUNT = 33;
   const [editMode,setEditMode] = React.useState(false);
+  const [route, setRoute] = React.useState(window.location.pathname || '/');
+
+  const navigateTo = (path)=>{
+    if(window.location.pathname !== path){
+      window.history.pushState({},'',path);
+    }
+    setRoute(path);
+  };
+
+  React.useEffect(()=>{
+    const onpop = ()=> setRoute(window.location.pathname || '/');
+    window.addEventListener('popstate', onpop);
+    return ()=> window.removeEventListener('popstate', onpop);
+  },[]);
 
   const ensureMainFits = () => {
     if(ensuringFitRef.current) return; ensuringFitRef.current=true;
@@ -298,11 +313,30 @@ function App(){
     setSidebarScale(count < BASE_COMP_COUNT ? Math.min(1.4, BASE_COMP_COUNT/Math.max(1,count)) : 1);
   },[cvData.competences, cvData.certifications]);
 
+  // Simple client-side route: show personalization page at /personalize
+  if(route === '/personalize'){
+    return (
+      <div className="app-workspace">
+        <div className="panel-left">
+          <div style={{padding:12}}>
+            <button onClick={()=>navigateTo('/')} className="btn small">← Retour</button>
+          </div>
+        </div>
+        <div className="cv-container" style={{padding:0}}>
+          <PersonalizePage />
+        </div>
+      </div>
+    );
+  }
+
   return <div className="app-workspace">
     <div className="panel-left">
       <div className="panel-header-buttons">
         <button onClick={toggleMode} className="btn small primary-alt">
           {mode === 'data' ? 'Basculer vers CV Dev' : 'Revenir au CV Data'}
+        </button>
+        <button onClick={()=>navigateTo('/personalize')} className="btn small neutral">
+          Personnaliser
         </button>
         <button onClick={()=>setEditMode(m=>!m)} className={`btn small ${editMode? 'danger':'neutral'}`}>
           {editMode? 'Quitter édition':'Mode édition'}
